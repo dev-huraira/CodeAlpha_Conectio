@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sign in to Conectio — Connect with purpose.">
+    <title>Sign In — Conectio</title>
+
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230A66C2'/><text x='16' y='23' font-family='Arial' font-size='20' font-weight='bold' fill='white' text-anchor='middle'>C</text></svg>">
+</head>
+<body>
+
+    <!-- ═══════════════ NAVBAR ═══════════════ -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="navbar__inner">
+            <a href="index.html" class="navbar__logo" id="navbar-logo">
+                <div class="navbar__logo-icon">C</div>
+                Conectio
+            </a>
+            <div class="navbar__links" id="navbar-links">
+                <a href="register.html" class="btn-secondary btn-secondary--sm" id="nav-join">Join now</a>
+            </div>
+        </div>
+    </nav>
+    <div class="navbar-spacer"></div>
+
+
+    <!-- ═══════════════ LOGIN FORM ═══════════════ -->
+    <main>
+        <div class="auth-card card-shadow" id="login-card">
+            <h1 class="auth-card__title" id="login-title">Sign in</h1>
+            <p class="auth-card__subtitle">Stay updated on your professional world.</p>
+
+            <div id="login-error" class="alert alert--error" style="display: none;"></div>
+
+            <form id="login-form" novalidate>
+                <div class="form-group">
+                    <label for="login-username" class="form-label">Username</label>
+                    <input
+                        type="text"
+                        id="login-username"
+                        class="input-field"
+                        placeholder="Enter your username"
+                        required
+                        autocomplete="username"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password" class="form-label">Password</label>
+                    <input
+                        type="password"
+                        id="login-password"
+                        class="input-field"
+                        placeholder="Enter your password"
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <button type="submit" class="btn-primary" id="login-submit" style="width: 100%; margin-top: 8px;">
+                    Sign in
+                </button>
+            </form>
+
+            <hr class="divider divider--lg">
+
+            <div class="auth-card__footer">
+                New to Conectio? <a href="register.html" id="login-register-link">Join now</a>
+            </div>
+        </div>
+    </main>
+
+
+    <!-- ═══════════════ FOOTER ═══════════════ -->
+    <footer class="footer" id="footer">
+        <span class="footer__brand">Conectio</span> &copy; 2025 · Connect with purpose.
+    </footer>
+
+
+    <!-- Scripts -->
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/main.js"></script>
+
+    <script>
+        // Redirect if already logged in
+        if (window.auth && window.auth.isLoggedIn()) {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const errorEl = document.getElementById('login-error');
+            const submitBtn = document.getElementById('login-submit');
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            errorEl.style.display = 'none';
+
+            if (!username || !password) {
+                errorEl.textContent = 'Please enter both username and password.';
+                errorEl.style.display = 'flex';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Signing in...';
+
+            try {
+                const data = await window.api.post('/token/', { username, password });
+                window.auth.saveToken(data.access, data.refresh);
+                window.location.href = 'index.html';
+            } catch (err) {
+                errorEl.textContent = err.status === 401
+                    ? 'Invalid username or password.'
+                    : (err.message || 'Something went wrong. Please try again.');
+                errorEl.style.display = 'flex';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Sign in';
+            }
+        });
+    </script>
+</body>
+</html>

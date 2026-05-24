@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explore the Conectio community — discover people and content.">
+    <title>Explore — Conectio</title>
+
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230A66C2'/><text x='16' y='23' font-family='Arial' font-size='20' font-weight='bold' fill='white' text-anchor='middle'>C</text></svg>">
+
+    <style>
+        .explore-header {
+            text-align: center;
+            padding: var(--space-2xl) var(--space-base);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .explore-header__title {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+        }
+        .explore-header__subtitle {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-md);
+            margin-bottom: var(--space-lg);
+        }
+        .explore-search {
+            position: relative;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        .explore-search__icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: var(--color-text-secondary);
+            pointer-events: none;
+        }
+        .explore-search__input {
+            width: 100%;
+            height: 44px;
+            border: 1px solid var(--color-border-input);
+            border-radius: var(--radius-sm);
+            padding: 0 16px 0 42px;
+            font-size: var(--font-size-base);
+            background: var(--color-bg-card);
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+        }
+        .explore-search__input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-primary-light);
+        }
+
+        .explore-grid {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 var(--space-base) var(--space-2xl);
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--space-base);
+        }
+
+        .explore-card {
+            text-align: center;
+            padding: var(--space-lg);
+            transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+        }
+        .explore-card:hover {
+            box-shadow: var(--shadow-elevated);
+            transform: translateY(-2px);
+        }
+        .explore-card__icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto var(--space-md);
+            border-radius: var(--radius-full);
+            background: var(--color-primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        .explore-card__title {
+            font-size: var(--font-size-md);
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+        }
+        .explore-card__desc {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+            line-height: 1.5;
+        }
+
+        .explore-section {
+            max-width: var(--max-width);
+            margin: var(--space-lg) auto 0;
+            padding: 0 var(--space-base);
+        }
+        .explore-section__title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: var(--space-base);
+        }
+
+        .feed-post {
+            padding: var(--space-lg);
+            margin-bottom: var(--space-base);
+        }
+        .feed-post__header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+        }
+        .feed-post__author-name {
+            font-weight: 600;
+            font-size: var(--font-size-base);
+        }
+        .feed-post__author-headline {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+        }
+        .feed-post__time {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-xs);
+        }
+        .feed-post__content {
+            line-height: 1.6;
+            margin-bottom: var(--space-md);
+        }
+        .feed-post__actions {
+            display: flex;
+            gap: var(--space-xs);
+            padding-top: var(--space-md);
+            border-top: 1px solid var(--color-border);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════════ NAVBAR ═══════════════ -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="navbar__inner">
+            <a href="index.html" class="navbar__logo" id="navbar-logo">
+                <div class="navbar__logo-icon">C</div>
+                Conectio
+            </a>
+            <div class="navbar__links" id="navbar-links">
+                <a href="index.html" class="navbar__link" id="nav-home">
+                    <span class="navbar__link-icon">🏠</span>
+                    <span class="navbar__link-label">Home</span>
+                </a>
+                <a href="explore.html" class="navbar__link navbar__link--active" id="nav-explore">
+                    <span class="navbar__link-icon">🔍</span>
+                    <span class="navbar__link-label">Explore</span>
+                </a>
+                <div id="nav-auth" style="display: flex; align-items: center; gap: 4px;">
+                    <a href="login.html" class="navbar__link" id="nav-signin">
+                        <span class="navbar__link-icon">👤</span>
+                        <span class="navbar__link-label">Sign In</span>
+                    </a>
+                    <a href="register.html" class="btn-primary btn-primary--sm navbar__cta" id="nav-join">Join now</a>
+                </div>
+                <div id="nav-user" style="display: none; align-items: center; gap: 4px;">
+                    <a href="profile.html" class="navbar__link" id="nav-profile">
+                        <span class="navbar__link-icon">👤</span>
+                        <span class="navbar__link-label" id="nav-username">Me</span>
+                    </a>
+                    <div class="dropdown">
+                        <button class="navbar__link" data-dropdown aria-label="User menu" id="nav-menu-btn">
+                            <span class="navbar__link-icon">⚙️</span>
+                            <span class="navbar__link-label">More</span>
+                        </button>
+                        <div class="dropdown__menu">
+                            <a href="profile.html" class="dropdown__item" id="dropdown-profile">View Profile</a>
+                            <hr class="dropdown__divider">
+                            <button class="dropdown__item" onclick="auth.logout()" id="dropdown-logout">Sign Out</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="navbar-spacer"></div>
+
+
+    <!-- ═══════════════ EXPLORE ═══════════════ -->
+    <main>
+        <div class="explore-header" id="explore-header">
+            <h1 class="explore-header__title">Explore Conectio</h1>
+            <p class="explore-header__subtitle">Discover people, ideas, and opportunities across the community.</p>
+            <div class="explore-search">
+                <span class="explore-search__icon">🔍</span>
+                <input
+                    type="search"
+                    class="explore-search__input"
+                    placeholder="Search people, posts, topics..."
+                    id="explore-search-input"
+                >
+            </div>
+        </div>
+
+        <!-- Feature cards -->
+        <div class="explore-grid" id="explore-features">
+            <div class="card-shadow explore-card">
+                <div class="explore-card__icon">👥</div>
+                <h3 class="explore-card__title">People</h3>
+                <p class="explore-card__desc">Find professionals in your field and grow your network.</p>
+            </div>
+            <div class="card-shadow explore-card">
+                <div class="explore-card__icon">📰</div>
+                <h3 class="explore-card__title">Posts</h3>
+                <p class="explore-card__desc">Browse the latest thoughts and updates from the community.</p>
+            </div>
+            <div class="card-shadow explore-card">
+                <div class="explore-card__icon">🏢</div>
+                <h3 class="explore-card__title">Companies</h3>
+                <p class="explore-card__desc">Explore organizations and discover new opportunities.</p>
+            </div>
+            <div class="card-shadow explore-card">
+                <div class="explore-card__icon">📚</div>
+                <h3 class="explore-card__title">Learning</h3>
+                <p class="explore-card__desc">Develop skills with curated content and courses.</p>
+            </div>
+            <div class="card-shadow explore-card">
+                <div class="explore-card__icon">📅</div>
+                <h3 class="explore-card__title">Events</h3>
+                <p class="explore-card__desc">Find and attend professional events and meetups.</p>
+            </div>
+            <div class="card-shadow explore-card">
+                <div class="explore-card__icon">📊</div>
+                <h3 class="explore-card__title">Trending</h3>
+                <p class="explore-card__desc">See what topics are being discussed right now.</p>
+            </div>
+        </div>
+
+        <!-- Recent feed -->
+        <div class="explore-section" id="explore-feed-section">
+            <h2 class="explore-section__title">Latest Posts</h2>
+            <div id="explore-feed">
+                <div class="card-shadow text-center" style="padding: 32px;">
+                    <p class="text-muted">Posts will appear here once the community starts sharing.</p>
+                    <a href="register.html" class="btn-primary" style="margin-top: 16px;">Be the first to post</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    <!-- ═══════════════ FOOTER ═══════════════ -->
+    <footer class="footer" id="footer">
+        <span class="footer__brand">Conectio</span> &copy; 2025 · Connect with purpose.
+    </footer>
+
+
+    <!-- Scripts -->
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Try to load latest posts
+            try {
+                const data = await window.api.get('/posts/');
+                const feedEl = document.getElementById('explore-feed');
+
+                if (data.results && data.results.length > 0) {
+                    feedEl.innerHTML = data.results.map(post => `
+                        <div class="card-shadow feed-post">
+                            <div class="feed-post__header">
+                                <div class="avatar avatar-md avatar-placeholder" style="width:48px;height:48px;font-size:18px;">
+                                    ${(post.author.first_name || post.author.username || '?').charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <div class="feed-post__author-name">${escapeHtml(post.author.first_name || '')} ${escapeHtml(post.author.last_name || '')}</div>
+                                    <div class="feed-post__author-headline">${escapeHtml(post.author.headline || '')}</div>
+                                    <div class="feed-post__time">${window.app.timeAgo(post.created_at)}</div>
+                                </div>
+                            </div>
+                            <div class="feed-post__content">${escapeHtml(post.content)}</div>
+                            <div class="feed-post__actions">
+                                <button class="btn-ghost">❤️ ${post.likes_count}</button>
+                                <button class="btn-ghost">💬 ${post.comments_count}</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) {
+                // Feed loading failed — show placeholder (already shown)
+            }
+        });
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

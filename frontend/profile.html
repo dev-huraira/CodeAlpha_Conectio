@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Your Conectio profile — showcase your professional identity.">
+    <title>Profile — Conectio</title>
+
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230A66C2'/><text x='16' y='23' font-family='Arial' font-size='20' font-weight='bold' fill='white' text-anchor='middle'>C</text></svg>">
+
+    <style>
+        .profile-banner {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #0A66C2 0%, #004182 50%, #002856 100%);
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+            position: relative;
+        }
+        .profile-header {
+            position: relative;
+            padding: 0 var(--space-lg) var(--space-lg);
+            margin-top: -48px;
+        }
+        .profile-header__avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: var(--radius-full);
+            border: 4px solid var(--color-bg-card);
+            object-fit: cover;
+            background: var(--color-primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+        .profile-header__info {
+            margin-top: var(--space-md);
+        }
+        .profile-header__name {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+        }
+        .profile-header__headline {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-md);
+            margin-top: var(--space-xs);
+        }
+        .profile-header__location {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+            margin-top: var(--space-xs);
+        }
+        .profile-header__stats {
+            display: flex;
+            gap: var(--space-lg);
+            margin-top: var(--space-md);
+            font-size: var(--font-size-sm);
+        }
+        .profile-header__stat-value {
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+        .profile-actions {
+            display: flex;
+            gap: var(--space-sm);
+            margin-top: var(--space-base);
+        }
+        .profile-section {
+            margin-top: var(--space-lg);
+        }
+        .profile-section__title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+        }
+        .post-item {
+            padding: var(--space-base) 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .post-item:last-child {
+            border-bottom: none;
+        }
+        .post-item__content {
+            margin-top: var(--space-sm);
+            line-height: 1.6;
+        }
+        .post-item__meta {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+            margin-top: var(--space-sm);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════════ NAVBAR ═══════════════ -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="navbar__inner">
+            <a href="index.html" class="navbar__logo" id="navbar-logo">
+                <div class="navbar__logo-icon">C</div>
+                Conectio
+            </a>
+            <div class="navbar__links" id="navbar-links">
+                <a href="index.html" class="navbar__link" id="nav-home">
+                    <span class="navbar__link-icon">🏠</span>
+                    <span class="navbar__link-label">Home</span>
+                </a>
+                <a href="explore.html" class="navbar__link" id="nav-explore">
+                    <span class="navbar__link-icon">🔍</span>
+                    <span class="navbar__link-label">Explore</span>
+                </a>
+                <div id="nav-auth" style="display: flex; align-items: center; gap: 4px;">
+                    <a href="login.html" class="navbar__link" id="nav-signin">
+                        <span class="navbar__link-icon">👤</span>
+                        <span class="navbar__link-label">Sign In</span>
+                    </a>
+                </div>
+                <div id="nav-user" style="display: none; align-items: center; gap: 4px;">
+                    <a href="profile.html" class="navbar__link navbar__link--active" id="nav-profile">
+                        <span class="navbar__link-icon">👤</span>
+                        <span class="navbar__link-label" id="nav-username">Me</span>
+                    </a>
+                    <div class="dropdown">
+                        <button class="navbar__link" data-dropdown aria-label="User menu" id="nav-menu-btn">
+                            <span class="navbar__link-icon">⚙️</span>
+                            <span class="navbar__link-label">More</span>
+                        </button>
+                        <div class="dropdown__menu">
+                            <a href="profile.html" class="dropdown__item" id="dropdown-profile">View Profile</a>
+                            <hr class="dropdown__divider">
+                            <button class="dropdown__item" onclick="auth.logout()" id="dropdown-logout">Sign Out</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="navbar-spacer"></div>
+
+
+    <!-- ═══════════════ PROFILE ═══════════════ -->
+    <main style="max-width: 800px; margin: var(--space-lg) auto; padding: 0 var(--space-base);">
+
+        <!-- Loading state -->
+        <div id="profile-loading" class="card-shadow text-center" style="padding: 48px;">
+            <div class="spinner" style="margin: 0 auto;"></div>
+            <p class="text-muted" style="margin-top: 16px;">Loading profile...</p>
+        </div>
+
+        <!-- Profile content (hidden until loaded) -->
+        <div id="profile-content" style="display: none;">
+            <div class="card-shadow" style="padding: 0; overflow: hidden;">
+                <div class="profile-banner" id="profile-banner"></div>
+                <div class="profile-header">
+                    <div class="profile-header__avatar" id="profile-avatar">?</div>
+                    <div class="profile-header__info">
+                        <h1 class="profile-header__name" id="profile-name">—</h1>
+                        <p class="profile-header__headline" id="profile-headline"></p>
+                        <p class="profile-header__location" id="profile-location"></p>
+                        <div class="profile-header__stats">
+                            <span><span class="profile-header__stat-value" id="profile-followers">0</span> followers</span>
+                            <span><span class="profile-header__stat-value" id="profile-following">0</span> following</span>
+                        </div>
+                    </div>
+                    <div class="profile-actions" id="profile-actions"></div>
+                </div>
+            </div>
+
+            <!-- Bio section -->
+            <div class="card-shadow profile-section" id="profile-bio-section" style="display: none;">
+                <h2 class="profile-section__title">About</h2>
+                <p id="profile-bio" style="line-height: 1.6;"></p>
+            </div>
+
+            <!-- Posts section -->
+            <div class="card-shadow profile-section">
+                <h2 class="profile-section__title">Posts</h2>
+                <div id="profile-posts">
+                    <p class="text-muted">No posts yet.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Not logged in state -->
+        <div id="profile-auth-required" style="display: none;">
+            <div class="card-shadow text-center" style="padding: 48px;">
+                <h2 style="margin-bottom: 8px;">Sign in to view your profile</h2>
+                <p class="text-muted" style="margin-bottom: 24px;">You need to be logged in to access your profile.</p>
+                <a href="login.html" class="btn-primary">Sign in</a>
+            </div>
+        </div>
+    </main>
+
+
+    <!-- ═══════════════ FOOTER ═══════════════ -->
+    <footer class="footer" id="footer">
+        <span class="footer__brand">Conectio</span> &copy; 2025 · Connect with purpose.
+    </footer>
+
+
+    <!-- Scripts -->
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loadingEl = document.getElementById('profile-loading');
+            const contentEl = document.getElementById('profile-content');
+            const authReqEl = document.getElementById('profile-auth-required');
+
+            if (!window.auth.isLoggedIn()) {
+                loadingEl.style.display = 'none';
+                authReqEl.style.display = 'block';
+                return;
+            }
+
+            try {
+                const profile = await window.api.get('/users/profile/');
+
+                // Populate profile data
+                document.getElementById('profile-name').textContent = profile.full_name || profile.username;
+                document.getElementById('profile-headline').textContent = profile.headline || '';
+                document.getElementById('profile-location').textContent = profile.location ? `📍 ${profile.location}` : '';
+                document.getElementById('profile-followers').textContent = profile.followers_count || 0;
+                document.getElementById('profile-following').textContent = profile.following_count || 0;
+
+                // Avatar
+                const avatarEl = document.getElementById('profile-avatar');
+                if (profile.avatar) {
+                    const img = document.createElement('img');
+                    img.src = profile.avatar;
+                    img.alt = profile.full_name;
+                    img.className = 'profile-header__avatar';
+                    avatarEl.replaceWith(img);
+                } else {
+                    const initials = (profile.full_name || profile.username || '?').charAt(0).toUpperCase();
+                    avatarEl.textContent = initials;
+                }
+
+                // Bio
+                if (profile.bio) {
+                    document.getElementById('profile-bio').textContent = profile.bio;
+                    document.getElementById('profile-bio-section').style.display = 'block';
+                }
+
+                // Load user posts
+                try {
+                    const posts = await window.api.get(`/posts/user/${profile.username}/`);
+                    const postsContainer = document.getElementById('profile-posts');
+                    
+                    if (posts.results && posts.results.length > 0) {
+                        postsContainer.innerHTML = posts.results.map(post => `
+                            <div class="post-item">
+                                <div class="post-item__content">${escapeHtml(post.content)}</div>
+                                <div class="post-item__meta">
+                                    ❤️ ${post.likes_count} · 💬 ${post.comments_count} · ${window.app.timeAgo(post.created_at)}
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                } catch (e) {
+                    // Posts loading failed — non-critical
+                }
+
+                loadingEl.style.display = 'none';
+                contentEl.style.display = 'block';
+
+            } catch (err) {
+                loadingEl.innerHTML = `
+                    <div class="alert alert--error">Failed to load profile. ${err.message}</div>
+                    <a href="index.html" class="btn-secondary" style="margin-top: 16px;">Back to Home</a>
+                `;
+            }
+        });
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Join Conectio — Create your account and connect with purpose.">
+    <title>Join Conectio</title>
+
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230A66C2'/><text x='16' y='23' font-family='Arial' font-size='20' font-weight='bold' fill='white' text-anchor='middle'>C</text></svg>">
+</head>
+<body>
+
+    <!-- ═══════════════ NAVBAR ═══════════════ -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="navbar__inner">
+            <a href="index.html" class="navbar__logo" id="navbar-logo">
+                <div class="navbar__logo-icon">C</div>
+                Conectio
+            </a>
+            <div class="navbar__links" id="navbar-links">
+                <a href="login.html" class="btn-ghost" id="nav-signin">Sign in</a>
+            </div>
+        </div>
+    </nav>
+    <div class="navbar-spacer"></div>
+
+
+    <!-- ═══════════════ REGISTER FORM ═══════════════ -->
+    <main>
+        <div class="auth-card card-shadow" id="register-card" style="max-width: 460px;">
+            <h1 class="auth-card__title" id="register-title">Make the most of your professional life</h1>
+            <p class="auth-card__subtitle">Join Conectio and build connections that matter.</p>
+
+            <div id="register-error" class="alert alert--error" style="display: none;"></div>
+            <div id="register-success" class="alert alert--success" style="display: none;"></div>
+
+            <form id="register-form" novalidate>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group">
+                        <label for="register-firstname" class="form-label">First name</label>
+                        <input
+                            type="text"
+                            id="register-firstname"
+                            class="input-field"
+                            placeholder="First name"
+                            required
+                            autocomplete="given-name"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="register-lastname" class="form-label">Last name</label>
+                        <input
+                            type="text"
+                            id="register-lastname"
+                            class="input-field"
+                            placeholder="Last name"
+                            required
+                            autocomplete="family-name"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="register-username" class="form-label">Username</label>
+                    <input
+                        type="text"
+                        id="register-username"
+                        class="input-field"
+                        placeholder="Choose a username"
+                        required
+                        autocomplete="username"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="register-email" class="form-label">Email</label>
+                    <input
+                        type="email"
+                        id="register-email"
+                        class="input-field"
+                        placeholder="you@example.com"
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="register-password" class="form-label">Password (8+ characters)</label>
+                    <input
+                        type="password"
+                        id="register-password"
+                        class="input-field"
+                        placeholder="Create a password"
+                        required
+                        minlength="8"
+                        autocomplete="new-password"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="register-password-confirm" class="form-label">Confirm password</label>
+                    <input
+                        type="password"
+                        id="register-password-confirm"
+                        class="input-field"
+                        placeholder="Confirm your password"
+                        required
+                        autocomplete="new-password"
+                    >
+                </div>
+
+                <p class="text-muted" style="margin-bottom: 16px;">
+                    By clicking Agree & Join, you agree to the Conectio User Agreement and Privacy Policy.
+                </p>
+
+                <button type="submit" class="btn-primary" id="register-submit" style="width: 100%;">
+                    Agree & Join
+                </button>
+            </form>
+
+            <hr class="divider divider--lg">
+
+            <div class="auth-card__footer">
+                Already on Conectio? <a href="login.html" id="register-login-link">Sign in</a>
+            </div>
+        </div>
+    </main>
+
+
+    <!-- ═══════════════ FOOTER ═══════════════ -->
+    <footer class="footer" id="footer">
+        <span class="footer__brand">Conectio</span> &copy; 2025 · Connect with purpose.
+    </footer>
+
+
+    <!-- Scripts -->
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/main.js"></script>
+
+    <script>
+        // Redirect if already logged in
+        if (window.auth && window.auth.isLoggedIn()) {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const errorEl = document.getElementById('register-error');
+            const successEl = document.getElementById('register-success');
+            const submitBtn = document.getElementById('register-submit');
+
+            const firstName = document.getElementById('register-firstname').value.trim();
+            const lastName = document.getElementById('register-lastname').value.trim();
+            const username = document.getElementById('register-username').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value;
+            const passwordConfirm = document.getElementById('register-password-confirm').value;
+
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+
+            // Client-side validation
+            if (!firstName || !lastName || !username || !email || !password) {
+                errorEl.textContent = 'All fields are required.';
+                errorEl.style.display = 'flex';
+                return;
+            }
+
+            if (password.length < 8) {
+                errorEl.textContent = 'Password must be at least 8 characters.';
+                errorEl.style.display = 'flex';
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                errorEl.textContent = 'Passwords do not match.';
+                errorEl.style.display = 'flex';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating account...';
+
+            try {
+                await window.api.post('/users/register/', {
+                    first_name: firstName,
+                    last_name: lastName,
+                    username,
+                    email,
+                    password,
+                    password_confirm: passwordConfirm,
+                });
+
+                successEl.textContent = 'Account created! Redirecting to sign in...';
+                successEl.style.display = 'flex';
+
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+
+            } catch (err) {
+                let message = 'Something went wrong. Please try again.';
+                if (err.data) {
+                    // Flatten Django validation errors
+                    const messages = [];
+                    for (const [field, errors] of Object.entries(err.data)) {
+                        if (Array.isArray(errors)) {
+                            messages.push(...errors);
+                        } else if (typeof errors === 'string') {
+                            messages.push(errors);
+                        }
+                    }
+                    if (messages.length) message = messages.join(' ');
+                }
+                errorEl.textContent = message;
+                errorEl.style.display = 'flex';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Agree & Join';
+            }
+        });
+    </script>
+</body>
+</html>

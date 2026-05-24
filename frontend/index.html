@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Conectio — Connect with purpose. Build meaningful professional relationships and grow your network.">
+    <title>Conectio — Connect with purpose</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+
+    <!-- Favicon (inline SVG data URI) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230A66C2'/><text x='16' y='23' font-family='Arial' font-size='20' font-weight='bold' fill='white' text-anchor='middle'>C</text></svg>">
+</head>
+<body>
+
+    <!-- ═══════════════ NAVBAR ═══════════════ -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="navbar__inner">
+            <a href="index.html" class="navbar__logo" id="navbar-logo">
+                <div class="navbar__logo-icon">C</div>
+                Conectio
+            </a>
+
+            <div class="navbar__links" id="navbar-links">
+                <a href="index.html" class="navbar__link navbar__link--active" id="nav-home">
+                    <span class="navbar__link-icon">🏠</span>
+                    <span class="navbar__link-label">Home</span>
+                </a>
+                <a href="explore.html" class="navbar__link" id="nav-explore">
+                    <span class="navbar__link-icon">🔍</span>
+                    <span class="navbar__link-label">Explore</span>
+                </a>
+
+                <!-- Shown when logged OUT -->
+                <div id="nav-auth" style="display: flex; align-items: center; gap: 4px;">
+                    <a href="login.html" class="navbar__link" id="nav-signin">
+                        <span class="navbar__link-icon">👤</span>
+                        <span class="navbar__link-label">Sign In</span>
+                    </a>
+                    <a href="register.html" class="btn-primary btn-primary--sm navbar__cta" id="nav-join">
+                        Join now
+                    </a>
+                </div>
+
+                <!-- Shown when logged IN -->
+                <div id="nav-user" style="display: none; align-items: center; gap: 4px;">
+                    <a href="profile.html" class="navbar__link" id="nav-profile">
+                        <span class="navbar__link-icon">👤</span>
+                        <span class="navbar__link-label" id="nav-username">Me</span>
+                    </a>
+                    <div class="dropdown">
+                        <button class="navbar__link" data-dropdown aria-label="User menu" id="nav-menu-btn">
+                            <span class="navbar__link-icon">⚙️</span>
+                            <span class="navbar__link-label">More</span>
+                        </button>
+                        <div class="dropdown__menu">
+                            <a href="profile.html" class="dropdown__item" id="dropdown-profile">View Profile</a>
+                            <hr class="dropdown__divider">
+                            <button class="dropdown__item" onclick="auth.logout()" id="dropdown-logout">Sign Out</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="navbar-spacer"></div>
+
+
+    <!-- ═══════════════ HERO ═══════════════ -->
+    <main>
+        <section class="hero" id="hero-section">
+            <div class="hero__bg-pattern"></div>
+
+            <div class="hero__content">
+                <h1 class="hero__title" id="hero-title">Conectio</h1>
+                <p class="hero__tagline" id="hero-tagline">
+                    Connect with <em>purpose</em>.
+                </p>
+                <p class="text-muted" style="font-size: 16px; margin-bottom: 32px; max-width: 480px; margin-left: auto; margin-right: auto;">
+                    Build meaningful professional relationships, share your expertise, and discover opportunities that matter.
+                </p>
+
+                <div class="hero__actions" id="hero-actions">
+                    <a href="register.html" class="btn-primary btn-primary--lg" id="hero-join-btn">
+                        Join now — it's free
+                    </a>
+                    <span class="hero__divider-text">or</span>
+                    <a href="login.html" class="btn-secondary" id="hero-signin-btn">
+                        Sign in
+                    </a>
+                </div>
+
+                <div class="hero__features" id="hero-features">
+                    <div class="hero__feature">
+                        <div class="hero__feature-icon">🤝</div>
+                        <span class="hero__feature-label">Network</span>
+                    </div>
+                    <div class="hero__feature">
+                        <div class="hero__feature-icon">💡</div>
+                        <span class="hero__feature-label">Share Ideas</span>
+                    </div>
+                    <div class="hero__feature">
+                        <div class="hero__feature-icon">🚀</div>
+                        <span class="hero__feature-label">Grow</span>
+                    </div>
+                    <div class="hero__feature">
+                        <div class="hero__feature-icon">🌍</div>
+                        <span class="hero__feature-label">Global Reach</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+
+    <!-- ═══════════════ FOOTER ═══════════════ -->
+    <footer class="footer" id="footer">
+        <span class="footer__brand">Conectio</span> &copy; 2025 · Connect with purpose.
+    </footer>
+
+
+    <!-- Scripts -->
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
