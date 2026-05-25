@@ -1,8 +1,11 @@
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.contrib.auth import get_user_model
 from .models import Post, Like, Comment
 from .serializers import PostSerializer, PostCreateSerializer, CommentSerializer
+
+User = get_user_model()
 
 
 class PostListCreateView(generics.ListCreateAPIView):
@@ -14,7 +17,7 @@ class PostListCreateView(generics.ListCreateAPIView):
         return PostSerializer
 
     def get_queryset(self):
-        return Post.objects.select_related('author', 'author__profile').all()
+        return Post.objects.select_related('author').all()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -28,7 +31,7 @@ class PostListCreateView(generics.ListCreateAPIView):
 class PostDetailView(generics.RetrieveDestroyAPIView):
     """Get or delete a single post."""
     serializer_class = PostSerializer
-    queryset = Post.objects.select_related('author', 'author__profile')
+    queryset = Post.objects.select_related('author')
 
     def get_permissions(self):
         if self.request.method == 'GET':
@@ -49,7 +52,10 @@ class LikeView(APIView):
         try:
             post = Post.objects.get(pk=pk)
         except Post.DoesNotExist:
-            return Response({'error': 'Post not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {'error': 'Post not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         like, created = Like.objects.get_or_create(user=request.user, post=post)
 
@@ -68,7 +74,9 @@ class CommentListCreateView(generics.ListCreateAPIView):
     serializer_class = CommentSerializer
 
     def get_queryset(self):
-        return Comment.objects.filter(post_id=self.kwargs['pk']).select_related('author', 'author__profile')
+        return Comment.objects.filter(
+            post_id=self.kwargs['pk']
+        ).select_related('author')
 
     def perform_create(self, serializer):
         post = Post.objects.get(pk=self.kwargs['pk'])
@@ -88,4 +96,4 @@ class UserPostsView(generics.ListAPIView):
     def get_queryset(self):
         return Post.objects.filter(
             author__username=self.kwargs['username']
-        ).select_related('author', 'author__profile')
+        ).select_related('author')

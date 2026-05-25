@@ -1,66 +1,76 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
-from .models import Profile
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
-class ProfileSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username', read_only=True)
-    email = serializers.EmailField(source='user.email', read_only=True)
-    full_name = serializers.ReadOnlyField()
-    followers_count = serializers.ReadOnlyField()
-    following_count = serializers.ReadOnlyField()
-
-    class Meta:
-        model = Profile
-        fields = [
-            'id', 'username', 'email', 'full_name',
-            'headline', 'bio', 'avatar', 'banner',
-            'location', 'website',
-            'followers_count', 'following_count',
-            'created_at', 'updated_at',
-        ]
-
-
-class RegisterSerializer(serializers.ModelSerializer):
+class UserRegisterSerializer(serializers.ModelSerializer):
+    """Registration serializer — validates and creates a new user."""
     password = serializers.CharField(write_only=True, min_length=8)
-    password_confirm = serializers.CharField(write_only=True)
+    password2 = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'first_name', 'last_name', 'password', 'password_confirm']
+        fields = [
+            'username', 'email', 'first_name', 'last_name',
+            'password', 'password2',
+        ]
 
     def validate(self, data):
-        if data['password'] != data['password_confirm']:
-            raise serializers.ValidationError({'password_confirm': 'Passwords do not match.'})
+        if data['password'] != data['password2']:
+            raise serializers.ValidationError(
+                {'password2': 'Passwords do not match.'}
+            )
         return data
 
     def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError('A user with this email already exists.')
-        return value
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError(
+                'A user with this email already exists.'
+            )
+        return value.lower()
 
     def create(self, validated_data):
-        validated_data.pop('password_confirm')
-        user = User.objects.create_user(**validated_data)
-        Profile.objects.create(user=user)
+        validated_data.pop('password2')
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
         return user
 
 
+class UserLoginSerializer(serializers.Serializer):
+    """Login serializer — accepts email + password."""
+    email = serializers.EmailField()
+    password = serializers.CharField()
+
+
+class UserPublicSerializer(serializers.ModelSerializer):
+    """Public profile — safe to expose to any authenticated user."""
+    full_name = serializers.ReadOnlyField()
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'email', 'first_name', 'last_name',
+            'full_name', 'bio', 'avatar', 'headline',
+            'followers_count', 'following_count', 'posts_count',
+            'date_joined',
+        ]
+        read_only_fields = fields
+
+
+class UserPrivateSerializer(UserPublicSerializer):
+    """Private profile — includes website, only for own profile."""
+
+    class Meta(UserPublicSerializer.Meta):
+        fields = UserPublicSerializer.Meta.fields + ['website']
+        read_only_fields = fields
+
+
 class UserMinimalSerializer(serializers.ModelSerializer):
-    """Lightweight user serializer for embedding in other responses."""
-    avatar = serializers.SerializerMethodField()
-    headline = serializers.SerializerMethodField()
+    """Lightweight serializer for embedding in other responses (posts, comments)."""
 
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'avatar', 'headline']
-
-    def get_avatar(self, obj):
-        if hasattr(obj, 'profile') and obj.profile.avatar:
-            return obj.profile.avatar.url
-        return None
-
-    def get_headline(self, obj):
-        if hasattr(obj, 'profile'):
-            return obj.profile.headline
-        return ''

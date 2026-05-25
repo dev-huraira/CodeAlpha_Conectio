@@ -1,39 +1,36 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 
 
-class Profile(models.Model):
-    """Extended user profile for Conectio."""
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    headline = models.CharField(max_length=220, blank=True)
-    bio = models.TextField(max_length=2000, blank=True)
+class User(AbstractUser):
+    """Custom user model for Conectio with profile fields built in."""
+    bio = models.TextField(blank=True, max_length=300)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
-    banner = models.ImageField(upload_to='banners/', blank=True, null=True)
-    location = models.CharField(max_length=100, blank=True)
-    website = models.URLField(max_length=200, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    headline = models.CharField(max_length=120, blank=True)
+    website = models.URLField(blank=True)
+    followers_count = models.IntegerField(default=0)
+    following_count = models.IntegerField(default=0)
+    posts_count = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['-date_joined']
 
     def __str__(self):
-        return f"{self.user.username}'s profile"
+        return self.username
 
     @property
     def full_name(self):
-        return f"{self.user.first_name} {self.user.last_name}".strip() or self.user.username
-
-    @property
-    def followers_count(self):
-        return self.user.followers.count()
-
-    @property
-    def following_count(self):
-        return self.user.following.count()
+        return f"{self.first_name} {self.last_name}".strip() or self.username
 
 
 class Connection(models.Model):
     """Follower/following relationship between users."""
-    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
-    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers')
+    follower = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='following_set'
+    )
+    following = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='followers_set'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

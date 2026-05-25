@@ -4,10 +4,8 @@
    ═══════════════════════════════════════════════ */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Update navbar auth state on every page
-    if (window.auth) {
-        window.auth.updateNavbar();
-    }
+    // Render dynamic navbar based on auth state
+    renderNavbar();
 
     // Setup mobile menu toggle
     setupMobileMenu();
@@ -15,6 +13,102 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup dropdown menus
     setupDropdowns();
 });
+
+
+/* ── Dynamic Navbar ────────────────────────── */
+
+/**
+ * Renders the correct navbar HTML based on auth state.
+ * Called on every page's DOMContentLoaded.
+ */
+function renderNavbar() {
+    const navLinks = document.getElementById('navbar-links');
+    if (!navLinks) return;
+
+    const loggedIn = window.auth && window.auth.isLoggedIn();
+    const user = loggedIn ? window.auth.getCurrentUser() : null;
+
+    // Detect current page for active state
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+
+    if (loggedIn && user) {
+        const displayName = user.first_name || user.username || 'Me';
+        const initial = displayName.charAt(0).toUpperCase();
+
+        navLinks.innerHTML = `
+            <a href="index.html" class="navbar__link ${currentPage === 'index.html' ? 'navbar__link--active' : ''}" id="nav-home">
+                <span class="navbar__link-icon">🏠</span>
+                <span class="navbar__link-label">Home</span>
+            </a>
+            <a href="profile.html" class="navbar__link ${currentPage === 'profile.html' ? 'navbar__link--active' : ''}" id="nav-network">
+                <span class="navbar__link-icon">👥</span>
+                <span class="navbar__link-label">My Network</span>
+            </a>
+            <a href="explore.html" class="navbar__link ${currentPage === 'explore.html' ? 'navbar__link--active' : ''}" id="nav-explore">
+                <span class="navbar__link-icon">🔍</span>
+                <span class="navbar__link-label">Explore</span>
+            </a>
+
+            <!-- User menu -->
+            <div class="dropdown" id="nav-user-dropdown">
+                <button class="navbar__link" data-dropdown aria-label="User menu" id="nav-menu-btn">
+                    <span class="navbar__avatar-mini" style="
+                        width: 24px; height: 24px;
+                        border-radius: 50%;
+                        background: var(--color-primary-light);
+                        color: var(--color-primary);
+                        display: flex; align-items: center; justify-content: center;
+                        font-size: 12px; font-weight: 700;
+                    ">${initial}</span>
+                    <span class="navbar__link-label">Me ▾</span>
+                </button>
+                <div class="dropdown__menu">
+                    <div style="padding: 12px 16px; border-bottom: 1px solid var(--color-border);">
+                        <div style="font-weight: 600; font-size: 14px;">${displayName}</div>
+                        <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">
+                            ${user.headline || user.email || '@' + user.username}
+                        </div>
+                    </div>
+                    <a href="profile.html" class="dropdown__item" id="dropdown-profile">
+                        👤 View Profile
+                    </a>
+                    <hr class="dropdown__divider">
+                    <button class="dropdown__item" id="dropdown-logout" style="color: var(--color-error);">
+                        🚪 Sign Out
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Bind logout
+        const logoutBtn = document.getElementById('dropdown-logout');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => window.auth.logout());
+        }
+
+    } else {
+        navLinks.innerHTML = `
+            <a href="index.html" class="navbar__link ${currentPage === 'index.html' ? 'navbar__link--active' : ''}" id="nav-home">
+                <span class="navbar__link-icon">🏠</span>
+                <span class="navbar__link-label">Home</span>
+            </a>
+            <a href="explore.html" class="navbar__link ${currentPage === 'explore.html' ? 'navbar__link--active' : ''}" id="nav-explore">
+                <span class="navbar__link-icon">🔍</span>
+                <span class="navbar__link-label">Explore</span>
+            </a>
+
+            <div id="nav-auth" style="display: flex; align-items: center; gap: 4px;">
+                <a href="login.html" class="navbar__link" id="nav-signin">
+                    <span class="navbar__link-icon">👤</span>
+                    <span class="navbar__link-label">Sign In</span>
+                </a>
+                <a href="register.html" class="btn-primary btn-primary--sm navbar__cta" id="nav-join">
+                    Join now
+                </a>
+            </div>
+        `;
+    }
+}
 
 
 /* ── Mobile Menu ───────────────────────────── */
@@ -135,6 +229,7 @@ function timeAgo(dateString) {
 
 /* ── Export utilities ──────────────────────── */
 window.app = {
+    renderNavbar,
     showToast,
     timeAgo,
 };

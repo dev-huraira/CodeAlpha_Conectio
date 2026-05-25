@@ -105,37 +105,7 @@
                 Conectio
             </a>
             <div class="navbar__links" id="navbar-links">
-                <a href="index.html" class="navbar__link" id="nav-home">
-                    <span class="navbar__link-icon">🏠</span>
-                    <span class="navbar__link-label">Home</span>
-                </a>
-                <a href="explore.html" class="navbar__link" id="nav-explore">
-                    <span class="navbar__link-icon">🔍</span>
-                    <span class="navbar__link-label">Explore</span>
-                </a>
-                <div id="nav-auth" style="display: flex; align-items: center; gap: 4px;">
-                    <a href="login.html" class="navbar__link" id="nav-signin">
-                        <span class="navbar__link-icon">👤</span>
-                        <span class="navbar__link-label">Sign In</span>
-                    </a>
-                </div>
-                <div id="nav-user" style="display: none; align-items: center; gap: 4px;">
-                    <a href="profile.html" class="navbar__link navbar__link--active" id="nav-profile">
-                        <span class="navbar__link-icon">👤</span>
-                        <span class="navbar__link-label" id="nav-username">Me</span>
-                    </a>
-                    <div class="dropdown">
-                        <button class="navbar__link" data-dropdown aria-label="User menu" id="nav-menu-btn">
-                            <span class="navbar__link-icon">⚙️</span>
-                            <span class="navbar__link-label">More</span>
-                        </button>
-                        <div class="dropdown__menu">
-                            <a href="profile.html" class="dropdown__item" id="dropdown-profile">View Profile</a>
-                            <hr class="dropdown__divider">
-                            <button class="dropdown__item" onclick="auth.logout()" id="dropdown-logout">Sign Out</button>
-                        </div>
-                    </div>
-                </div>
+                <!-- Dynamically rendered by main.js renderNavbar() -->
             </div>
         </div>
     </nav>
@@ -220,12 +190,12 @@
             }
 
             try {
-                const profile = await window.api.get('/users/profile/');
+                const profile = await window.api.get('/users/me/');
 
                 // Populate profile data
                 document.getElementById('profile-name').textContent = profile.full_name || profile.username;
                 document.getElementById('profile-headline').textContent = profile.headline || '';
-                document.getElementById('profile-location').textContent = profile.location ? `📍 ${profile.location}` : '';
+                document.getElementById('profile-location').textContent = '';
                 document.getElementById('profile-followers').textContent = profile.followers_count || 0;
                 document.getElementById('profile-following').textContent = profile.following_count || 0;
 

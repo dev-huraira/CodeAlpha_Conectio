@@ -3,8 +3,12 @@
    Token management and authentication helpers
    ═══════════════════════════════════════════════ */
 
-const TOKEN_KEY = 'conectio_access_token';
-const REFRESH_KEY = 'conectio_refresh_token';
+const TOKEN_KEY = 'conectio_access';
+const REFRESH_KEY = 'conectio_refresh';
+const USER_KEY = 'conectio_user';
+
+
+/* ── Token Management ──────────────────────── */
 
 /**
  * Save JWT tokens to localStorage.
@@ -35,22 +39,42 @@ function getRefreshToken() {
 }
 
 /**
- * Remove all auth tokens (logout).
+ * Save the user object to localStorage.
+ * @param {object} userObj - User data from the API
+ */
+function saveUser(userObj) {
+    localStorage.setItem(USER_KEY, JSON.stringify(userObj));
+}
+
+/**
+ * Get the cached user object.
+ * @returns {object|null}
+ */
+function getUser() {
+    try {
+        return JSON.parse(localStorage.getItem(USER_KEY));
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Remove all auth data from localStorage (logout).
  */
 function removeToken() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REFRESH_KEY);
+    localStorage.removeItem(USER_KEY);
 }
 
 /**
- * Check if the user is logged in (token exists).
+ * Check if the user is logged in (token exists and not expired).
  * @returns {boolean}
  */
 function isLoggedIn() {
     const token = getToken();
     if (!token) return false;
 
-    // Check if token is expired
     try {
         const payload = parseJWT(token);
         const now = Math.floor(Date.now() / 1000);
@@ -78,10 +102,15 @@ function parseJWT(token) {
 }
 
 /**
- * Get the current user info from the JWT.
- * @returns {object|null} - { user_id, username, email }
+ * Get the current user info — prefers cached user object, falls back to JWT.
+ * @returns {object|null}
  */
 function getCurrentUser() {
+    // First try the cached full user object
+    const cached = getUser();
+    if (cached) return cached;
+
+    // Fallback: extract from JWT
     const token = getToken();
     if (!token) return null;
 
@@ -116,11 +145,30 @@ function redirectIfLoggedIn() {
 }
 
 /**
- * Logout the user and redirect to home.
+ * Logout the user — blacklist token server-side, clear storage, redirect.
  */
-function logout() {
+async function logout() {
+    const refreshToken = getRefreshToken();
+    const accessToken = getToken();
+
+    // Try to blacklist the refresh token on the server
+    if (refreshToken && accessToken) {
+        try {
+            await fetch(`${window.api.BASE}/users/logout/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({ refresh: refreshToken }),
+            });
+        } catch {
+            // Ignore errors — we'll clear local storage regardless
+        }
+    }
+
     removeToken();
-    window.location.href = 'index.html';
+    window.location.href = 'login.html';
 }
 
 /**
@@ -139,7 +187,7 @@ function updateNavbar() {
         const user = getCurrentUser();
         const usernameEl = document.getElementById('nav-username');
         if (usernameEl && user) {
-            usernameEl.textContent = user.username || 'Me';
+            usernameEl.textContent = user.first_name || user.username || 'Me';
         }
     } else {
         authNav.style.display = 'flex';
@@ -153,6 +201,8 @@ window.auth = {
     saveToken,
     getToken,
     getRefreshToken,
+    saveUser,
+    getUser,
     removeToken,
     isLoggedIn,
     getCurrentUser,

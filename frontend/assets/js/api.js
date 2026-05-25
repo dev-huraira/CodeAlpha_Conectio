@@ -15,7 +15,7 @@ const API_BASE = 'http://localhost:8000/api';
  */
 async function apiFetch(endpoint, options = {}) {
     const url = `${API_BASE}${endpoint}`;
-    const token = localStorage.getItem('conectio_access_token');
+    const token = localStorage.getItem('conectio_access');
 
     const headers = {
         ...(options.headers || {}),

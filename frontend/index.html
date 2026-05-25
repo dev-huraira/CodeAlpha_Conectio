@@ -22,53 +22,15 @@
                 <div class="navbar__logo-icon">C</div>
                 Conectio
             </a>
-
             <div class="navbar__links" id="navbar-links">
-                <a href="index.html" class="navbar__link navbar__link--active" id="nav-home">
-                    <span class="navbar__link-icon">🏠</span>
-                    <span class="navbar__link-label">Home</span>
-                </a>
-                <a href="explore.html" class="navbar__link" id="nav-explore">
-                    <span class="navbar__link-icon">🔍</span>
-                    <span class="navbar__link-label">Explore</span>
-                </a>
-
-                <!-- Shown when logged OUT -->
-                <div id="nav-auth" style="display: flex; align-items: center; gap: 4px;">
-                    <a href="login.html" class="navbar__link" id="nav-signin">
-                        <span class="navbar__link-icon">👤</span>
-                        <span class="navbar__link-label">Sign In</span>
-                    </a>
-                    <a href="register.html" class="btn-primary btn-primary--sm navbar__cta" id="nav-join">
-                        Join now
-                    </a>
-                </div>
-
-                <!-- Shown when logged IN -->
-                <div id="nav-user" style="display: none; align-items: center; gap: 4px;">
-                    <a href="profile.html" class="navbar__link" id="nav-profile">
-                        <span class="navbar__link-icon">👤</span>
-                        <span class="navbar__link-label" id="nav-username">Me</span>
-                    </a>
-                    <div class="dropdown">
-                        <button class="navbar__link" data-dropdown aria-label="User menu" id="nav-menu-btn">
-                            <span class="navbar__link-icon">⚙️</span>
-                            <span class="navbar__link-label">More</span>
-                        </button>
-                        <div class="dropdown__menu">
-                            <a href="profile.html" class="dropdown__item" id="dropdown-profile">View Profile</a>
-                            <hr class="dropdown__divider">
-                            <button class="dropdown__item" onclick="auth.logout()" id="dropdown-logout">Sign Out</button>
-                        </div>
-                    </div>
-                </div>
+                <!-- Dynamically rendered by main.js renderNavbar() -->
             </div>
         </div>
     </nav>
     <div class="navbar-spacer"></div>
 
 
-    <!-- ═══════════════ HERO ═══════════════ -->
+    <!-- ═══════════════ HERO (shown when logged out) ═══════════════ -->
     <main>
         <section class="hero" id="hero-section">
             <div class="hero__bg-pattern"></div>
@@ -112,6 +74,22 @@
                 </div>
             </div>
         </section>
+
+        <!-- ═══════════════ FEED (shown when logged in) ═══════════════ -->
+        <section id="feed-section" style="display: none;">
+            <div class="container" style="max-width: 600px; padding-top: var(--space-lg);">
+                <div class="card-shadow" style="padding: var(--space-lg); text-align: center;">
+                    <h2 style="margin-bottom: var(--space-sm);">Welcome back! 👋</h2>
+                    <p class="text-muted" id="welcome-message" style="margin-bottom: var(--space-lg);">
+                        Your feed is coming soon.
+                    </p>
+                    <div style="display: flex; gap: var(--space-sm); justify-content: center; flex-wrap: wrap;">
+                        <a href="profile.html" class="btn-primary">View Profile</a>
+                        <a href="explore.html" class="btn-secondary">Explore</a>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
 
@@ -125,5 +103,30 @@
     <script src="assets/js/api.js"></script>
     <script src="assets/js/auth.js"></script>
     <script src="assets/js/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const heroSection = document.getElementById('hero-section');
+            const feedSection = document.getElementById('feed-section');
+
+            if (window.auth.isLoggedIn()) {
+                // Show feed, hide hero
+                heroSection.style.display = 'none';
+                feedSection.style.display = 'block';
+
+                // Personalize welcome
+                const user = window.auth.getCurrentUser();
+                if (user) {
+                    const name = user.first_name || user.username || 'there';
+                    document.getElementById('welcome-message').textContent =
+                        `Good to see you, ${name}. Your feed is coming soon.`;
+                }
+            } else {
+                // Show hero, hide feed
+                heroSection.style.display = '';
+                feedSection.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>

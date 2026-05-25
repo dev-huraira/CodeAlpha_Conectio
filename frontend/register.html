@@ -9,6 +9,60 @@
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/components.css">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230A66C2'/><text x='16' y='23' font-family='Arial' font-size='20' font-weight='bold' fill='white' text-anchor='middle'>C</text></svg>">
+
+    <style>
+        .auth-page {
+            min-height: calc(100vh - var(--navbar-height) - 80px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg) var(--space-base);
+        }
+        .auth-card {
+            max-width: 400px;
+            width: 100%;
+            animation: fadeSlideUp 500ms ease-out;
+        }
+        .auth-logo {
+            text-align: center;
+            margin-bottom: var(--space-lg);
+        }
+        .auth-logo__text {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--color-primary);
+            letter-spacing: -0.5px;
+        }
+        .password-wrapper {
+            position: relative;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--color-text-secondary);
+            padding: 4px;
+            line-height: 1;
+            transition: color var(--transition-fast);
+        }
+        .password-toggle:hover {
+            color: var(--color-text-primary);
+        }
+        .name-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
 
@@ -28,16 +82,20 @@
 
 
     <!-- ═══════════════ REGISTER FORM ═══════════════ -->
-    <main>
-        <div class="auth-card card-shadow" id="register-card" style="max-width: 460px;">
-            <h1 class="auth-card__title" id="register-title">Make the most of your professional life</h1>
-            <p class="auth-card__subtitle">Join Conectio and build connections that matter.</p>
+    <main class="auth-page">
+        <div class="auth-card card-shadow" id="register-card">
+            <div class="auth-logo">
+                <span class="auth-logo__text">Conectio</span>
+            </div>
+
+            <h1 class="auth-card__title" id="register-title">Join Conectio</h1>
+            <p class="auth-card__subtitle">Connect with purpose.</p>
 
             <div id="register-error" class="alert alert--error" style="display: none;"></div>
             <div id="register-success" class="alert alert--success" style="display: none;"></div>
 
             <form id="register-form" novalidate>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="name-grid">
                     <div class="form-group">
                         <label for="register-firstname" class="form-label">First name</label>
                         <input
@@ -48,6 +106,7 @@
                             required
                             autocomplete="given-name"
                         >
+                        <div class="form-error" id="register-firstname-error" style="display: none;"></div>
                     </div>
                     <div class="form-group">
                         <label for="register-lastname" class="form-label">Last name</label>
@@ -59,6 +118,7 @@
                             required
                             autocomplete="family-name"
                         >
+                        <div class="form-error" id="register-lastname-error" style="display: none;"></div>
                     </div>
                 </div>
 
@@ -72,6 +132,7 @@
                         required
                         autocomplete="username"
                     >
+                    <div class="form-error" id="register-username-error" style="display: none;"></div>
                 </div>
 
                 <div class="form-group">
@@ -84,31 +145,44 @@
                         required
                         autocomplete="email"
                     >
+                    <div class="form-error" id="register-email-error" style="display: none;"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="register-password" class="form-label">Password (8+ characters)</label>
-                    <input
-                        type="password"
-                        id="register-password"
-                        class="input-field"
-                        placeholder="Create a password"
-                        required
-                        minlength="8"
-                        autocomplete="new-password"
-                    >
+                    <div class="password-wrapper">
+                        <input
+                            type="password"
+                            id="register-password"
+                            class="input-field"
+                            placeholder="Create a password"
+                            required
+                            minlength="8"
+                            autocomplete="new-password"
+                        >
+                        <button type="button" class="password-toggle" data-toggle="register-password" aria-label="Show password">
+                            👁️
+                        </button>
+                    </div>
+                    <div class="form-error" id="register-password-error" style="display: none;"></div>
                 </div>
 
                 <div class="form-group">
-                    <label for="register-password-confirm" class="form-label">Confirm password</label>
-                    <input
-                        type="password"
-                        id="register-password-confirm"
-                        class="input-field"
-                        placeholder="Confirm your password"
-                        required
-                        autocomplete="new-password"
-                    >
+                    <label for="register-password2" class="form-label">Confirm password</label>
+                    <div class="password-wrapper">
+                        <input
+                            type="password"
+                            id="register-password2"
+                            class="input-field"
+                            placeholder="Confirm your password"
+                            required
+                            autocomplete="new-password"
+                        >
+                        <button type="button" class="password-toggle" data-toggle="register-password2" aria-label="Show password">
+                            👁️
+                        </button>
+                    </div>
+                    <div class="form-error" id="register-password2-error" style="display: none;"></div>
                 </div>
 
                 <p class="text-muted" style="margin-bottom: 16px;">
@@ -120,9 +194,9 @@
                 </button>
             </form>
 
-            <hr class="divider divider--lg">
+            <div class="divider-text" style="margin: var(--space-lg) 0;">or</div>
 
-            <div class="auth-card__footer">
+            <div class="auth-card__footer" style="margin-top: 0;">
                 Already on Conectio? <a href="login.html" id="register-login-link">Sign in</a>
             </div>
         </div>
@@ -146,11 +220,50 @@
             window.location.href = 'index.html';
         }
 
+        // Password show/hide toggles
+        document.querySelectorAll('.password-toggle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-toggle');
+                const input = document.getElementById(targetId);
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    btn.textContent = '🙈';
+                    btn.setAttribute('aria-label', 'Hide password');
+                } else {
+                    input.type = 'password';
+                    btn.textContent = '👁️';
+                    btn.setAttribute('aria-label', 'Show password');
+                }
+            });
+        });
+
+        // Helper: clear all field errors
+        function clearErrors() {
+            document.getElementById('register-error').style.display = 'none';
+            document.getElementById('register-success').style.display = 'none';
+            document.querySelectorAll('.form-error').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.input-field--error').forEach(el => el.classList.remove('input-field--error'));
+        }
+
+        // Helper: show inline field error
+        function showFieldError(fieldId, message) {
+            const errorEl = document.getElementById(fieldId + '-error');
+            const inputEl = document.getElementById(fieldId);
+            if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+            }
+            if (inputEl) {
+                inputEl.classList.add('input-field--error');
+            }
+        }
+
+        // Register form submission
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            clearErrors();
 
             const errorEl = document.getElementById('register-error');
-            const successEl = document.getElementById('register-success');
             const submitBtn = document.getElementById('register-submit');
 
             const firstName = document.getElementById('register-firstname').value.trim();
@@ -158,69 +271,101 @@
             const username = document.getElementById('register-username').value.trim();
             const email = document.getElementById('register-email').value.trim();
             const password = document.getElementById('register-password').value;
-            const passwordConfirm = document.getElementById('register-password-confirm').value;
+            const password2 = document.getElementById('register-password2').value;
 
-            errorEl.style.display = 'none';
-            successEl.style.display = 'none';
+            // Client-side validation with inline errors
+            let hasError = false;
 
-            // Client-side validation
-            if (!firstName || !lastName || !username || !email || !password) {
-                errorEl.textContent = 'All fields are required.';
-                errorEl.style.display = 'flex';
-                return;
+            if (!firstName) {
+                showFieldError('register-firstname', 'First name is required.');
+                hasError = true;
+            }
+            if (!lastName) {
+                showFieldError('register-lastname', 'Last name is required.');
+                hasError = true;
+            }
+            if (!username) {
+                showFieldError('register-username', 'Username is required.');
+                hasError = true;
+            }
+            if (!email) {
+                showFieldError('register-email', 'Email is required.');
+                hasError = true;
+            } else if (!email.includes('@')) {
+                showFieldError('register-email', 'Please enter a valid email.');
+                hasError = true;
+            }
+            if (!password) {
+                showFieldError('register-password', 'Password is required.');
+                hasError = true;
+            } else if (password.length < 8) {
+                showFieldError('register-password', 'Password must be at least 8 characters.');
+                hasError = true;
+            }
+            if (password !== password2) {
+                showFieldError('register-password2', 'Passwords do not match.');
+                hasError = true;
             }
 
-            if (password.length < 8) {
-                errorEl.textContent = 'Password must be at least 8 characters.';
-                errorEl.style.display = 'flex';
-                return;
-            }
+            if (hasError) return;
 
-            if (password !== passwordConfirm) {
-                errorEl.textContent = 'Passwords do not match.';
-                errorEl.style.display = 'flex';
-                return;
-            }
-
+            // Show loading state
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Creating account...';
+            submitBtn.innerHTML = '<div class="spinner spinner--sm" style="border-color: rgba(255,255,255,0.3); border-top-color: #fff; width: 18px; height: 18px;"></div> Creating account...';
 
             try {
-                await window.api.post('/users/register/', {
+                const data = await window.api.post('/users/register/', {
                     first_name: firstName,
                     last_name: lastName,
                     username,
                     email,
                     password,
-                    password_confirm: passwordConfirm,
+                    password2,
                 });
 
-                successEl.textContent = 'Account created! Redirecting to sign in...';
-                successEl.style.display = 'flex';
-
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 1500);
+                // Auto-login: save tokens + user, redirect to home
+                window.auth.saveToken(data.tokens.access, data.tokens.refresh);
+                window.auth.saveUser(data.user);
+                window.location.href = 'index.html';
 
             } catch (err) {
-                let message = 'Something went wrong. Please try again.';
-                if (err.data) {
-                    // Flatten Django validation errors
-                    const messages = [];
+                // Handle server validation errors with inline messages
+                if (err.data && typeof err.data === 'object') {
+                    const fieldMap = {
+                        first_name: 'register-firstname',
+                        last_name: 'register-lastname',
+                        username: 'register-username',
+                        email: 'register-email',
+                        password: 'register-password',
+                        password2: 'register-password2',
+                    };
+
+                    let hasFieldError = false;
                     for (const [field, errors] of Object.entries(err.data)) {
-                        if (Array.isArray(errors)) {
-                            messages.push(...errors);
-                        } else if (typeof errors === 'string') {
-                            messages.push(errors);
+                        if (fieldMap[field]) {
+                            const msg = Array.isArray(errors) ? errors.join(' ') : String(errors);
+                            showFieldError(fieldMap[field], msg);
+                            hasFieldError = true;
                         }
                     }
-                    if (messages.length) message = messages.join(' ');
+
+                    if (!hasFieldError) {
+                        // Show generic error if no field-specific errors
+                        const messages = [];
+                        for (const [, errors] of Object.entries(err.data)) {
+                            if (Array.isArray(errors)) messages.push(...errors);
+                            else if (typeof errors === 'string') messages.push(errors);
+                        }
+                        errorEl.textContent = messages.join(' ') || 'Registration failed.';
+                        errorEl.style.display = 'flex';
+                    }
+                } else {
+                    errorEl.textContent = err.message || 'Something went wrong. Please try again.';
+                    errorEl.style.display = 'flex';
                 }
-                errorEl.textContent = message;
-                errorEl.style.display = 'flex';
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Agree & Join';
+                submitBtn.innerHTML = 'Agree & Join';
             }
         });
     </script>
