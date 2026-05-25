@@ -840,20 +840,306 @@
             try {
                 const data = await window.api.get(`/posts/user/${username}/`);
                 const postsContainer = document.getElementById('profile-posts');
+                const posts = data.results || [];
 
-                if (data.results && data.results.length > 0) {
-                    document.getElementById('activity-post-count').textContent = data.results.length;
-                    postsContainer.innerHTML = data.results.map(post => `
-                        <div class="post-item">
-                            <div class="post-item__content">${window.app.escapeHtml(post.content)}</div>
-                            <div class="post-item__meta">
-                                ❤️ ${post.likes_count || 0} · 💬 ${post.comments_count || 0} · ${window.app.timeAgo(post.created_at)}
-                            </div>
-                        </div>
-                    `).join('');
+                if (posts.length > 0) {
+                    document.getElementById('activity-post-count').textContent = posts.length;
+                    postsContainer.innerHTML = posts.map(post => renderProfilePostCard(post)).join('');
+
+                    // Attach events for each post card
+                    posts.forEach(post => attachProfilePostEvents(post.id));
                 }
             } catch (e) {
                 // Posts endpoint may not exist yet — non-critical
+            }
+        }
+
+        /* ── Post Card Rendering (Profile Version) ── */
+        function renderProfilePostCard(post) {
+            const author = post.author || {};
+            const avatarSrc = author.avatar || window.app.getInitialsAvatar(author.username || 'U', 48);
+            const displayName = `${author.first_name || ''} ${author.last_name || ''}`.trim() || author.username || 'User';
+            const headline = author.headline || '';
+            const timeAgoStr = post.time_ago || window.app.timeAgo(post.created_at);
+            const content = post.content || '';
+            const isLiked = post.is_liked || false;
+            const currentUser = window.auth.getCurrentUser();
+            const isOwn = currentUser && author.id === currentUser.id;
+
+            // Truncate
+            const TRUNCATE = 280;
+            let displayContent, isTruncated = false;
+            if (content.length > TRUNCATE) {
+                displayContent = window.app.escapeHtml(content.substring(0, TRUNCATE));
+                isTruncated = true;
+            } else {
+                displayContent = window.app.escapeHtml(content);
+            }
+            const fullContent = window.app.escapeHtml(content);
+
+            let imageHtml = '';
+            if (post.image) {
+                const imgUrl = post.image.startsWith('http') ? post.image : `${window.api.BASE.replace('/api', '')}${post.image}`;
+                imageHtml = `<img style="width:100%;max-height:400px;object-fit:cover;display:block;" src="${imgUrl}" alt="Post image" loading="lazy">`;
+            }
+
+            const likesCount = post.likes_count || 0;
+            const commentsCount = post.comments_count || 0;
+
+            return `
+            <div class="post-item" id="profile-post-${post.id}" data-post-id="${post.id}" style="padding: 0; border-bottom: none; margin-bottom: 12px; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden;">
+                <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 16px;">
+                    <img style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;" src="${avatarSrc}" alt="${window.app.escapeHtml(displayName)}">
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:600;font-size:14px;">${window.app.escapeHtml(displayName)}</div>
+                        ${headline ? `<div style="font-size:12px;color:var(--color-text-secondary);">${window.app.escapeHtml(headline)}</div>` : ''}
+                        <div style="font-size:12px;color:var(--color-text-secondary);">${timeAgoStr}</div>
+                    </div>
+                    ${isOwn ? `<button style="border:none;background:none;cursor:pointer;font-size:18px;color:var(--color-text-secondary);padding:4px;" data-action="menu" data-post-id="${post.id}">⋯</button>` : ''}
+                </div>
+                <div style="padding:0 16px 12px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;" id="profile-post-content-${post.id}">
+                    ${isTruncated ? `<span class="truncated-text">${displayContent}...</span><button style="color:var(--color-text-secondary);font-weight:600;border:none;background:none;cursor:pointer;font-size:14px;" data-action="see-more" data-post-id="${post.id}">see more</button><span class="full-text" style="display:none;">${fullContent}</span>` : fullContent}
+                </div>
+                ${imageHtml}
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-top:1px solid var(--color-border);font-size:12px;color:var(--color-text-secondary);">
+                    <span>${likesCount > 0 ? `👍 <span id="profile-likes-${post.id}">${likesCount}</span>` : `<span id="profile-likes-${post.id}">0</span>`}</span>
+                    <span><span id="profile-comments-count-${post.id}">${commentsCount}</span> comment${commentsCount !== 1 ? 's' : ''}</span>
+                </div>
+                <div style="display:flex;border-top:1px solid var(--color-border);">
+                    <button style="flex:1;padding:10px 0;font-size:14px;font-weight:600;color:${isLiked ? 'var(--color-primary)' : 'var(--color-text-secondary)'};border:none;background:none;cursor:pointer;transition:background 150ms ease;" id="profile-like-btn-${post.id}" data-action="like" data-post-id="${post.id}" onmouseover="this.style.background='var(--color-bg-hover)'" onmouseout="this.style.background='none'">
+                        👍 ${isLiked ? 'Liked' : 'Like'}
+                    </button>
+                    <button style="flex:1;padding:10px 0;font-size:14px;font-weight:600;color:var(--color-text-secondary);border:none;background:none;cursor:pointer;transition:background 150ms ease;" data-action="comment" data-post-id="${post.id}" onmouseover="this.style.background='var(--color-bg-hover)'" onmouseout="this.style.background='none'">
+                        💬 Comment
+                    </button>
+                </div>
+                <div id="profile-comments-section-${post.id}"></div>
+                <div id="profile-delete-confirm-${post.id}"></div>
+            </div>
+            `;
+        }
+
+        /* ── Profile Post Events ──────────────── */
+        function attachProfilePostEvents(postId) {
+            const card = document.getElementById(`profile-post-${postId}`);
+            if (!card) return;
+
+            card.addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-action]');
+                if (!btn) return;
+                const action = btn.dataset.action;
+                const id = parseInt(btn.dataset.postId);
+
+                switch (action) {
+                    case 'like': handleProfileLike(id); break;
+                    case 'comment': toggleProfileComments(id); break;
+                    case 'see-more': handleProfileSeeMore(id); break;
+                    case 'menu': handleProfilePostMenu(id); break;
+                    case 'cancel-delete': document.getElementById(`profile-delete-confirm-${id}`).innerHTML = ''; break;
+                    case 'confirm-delete': deleteProfilePost(id); break;
+                }
+            });
+        }
+
+        async function handleProfileLike(postId) {
+            try {
+                const result = await window.api.post(`/posts/${postId}/like/`);
+                const btn = document.getElementById(`profile-like-btn-${postId}`);
+                const isLiked = result.status === 'liked';
+                if (btn) {
+                    btn.style.color = isLiked ? 'var(--color-primary)' : 'var(--color-text-secondary)';
+                    btn.innerHTML = `👍 ${isLiked ? 'Liked' : 'Like'}`;
+                }
+                const countEl = document.getElementById(`profile-likes-${postId}`);
+                if (countEl) countEl.textContent = result.likes_count;
+            } catch (err) {
+                window.app.showToast('Failed to like post.', 'error');
+            }
+        }
+
+        function handleProfileSeeMore(postId) {
+            const contentEl = document.getElementById(`profile-post-content-${postId}`);
+            if (!contentEl) return;
+            const truncated = contentEl.querySelector('.truncated-text');
+            const full = contentEl.querySelector('.full-text');
+            const seeMore = contentEl.querySelector('[data-action="see-more"]');
+            if (truncated) truncated.style.display = 'none';
+            if (seeMore) seeMore.style.display = 'none';
+            if (full) full.style.display = 'inline';
+        }
+
+        function handleProfilePostMenu(postId) {
+            const container = document.getElementById(`profile-delete-confirm-${postId}`);
+            if (!container) return;
+            if (container.innerHTML.trim()) {
+                container.innerHTML = '';
+                return;
+            }
+            container.innerHTML = `
+                <div style="padding:12px 16px;background:rgba(204,16,22,0.05);border-top:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-size:13px;color:var(--color-text-secondary);">Delete this post?</span>
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn-secondary btn-secondary--sm" data-action="cancel-delete" data-post-id="${postId}" style="padding:4px 12px;font-size:13px;">Cancel</button>
+                        <button class="btn-primary btn-primary--sm" data-action="confirm-delete" data-post-id="${postId}" style="padding:4px 12px;font-size:13px;background:var(--color-error);">Delete</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function deleteProfilePost(postId) {
+            try {
+                await window.api.delete(`/posts/${postId}/`);
+                const card = document.getElementById(`profile-post-${postId}`);
+                if (card) {
+                    card.style.opacity = '0';
+                    card.style.transition = 'opacity 300ms ease';
+                    setTimeout(() => card.remove(), 300);
+                }
+                // Update profile stats
+                const postsCountEl = document.getElementById('profile-posts-count');
+                if (postsCountEl) {
+                    postsCountEl.textContent = Math.max(0, parseInt(postsCountEl.textContent || 0) - 1);
+                }
+                const actPostCount = document.getElementById('activity-post-count');
+                if (actPostCount) {
+                    actPostCount.textContent = Math.max(0, parseInt(actPostCount.textContent || 0) - 1);
+                }
+                profileData.posts_count = Math.max(0, (profileData.posts_count || 0) - 1);
+                window.app.showToast('Post deleted.', 'success');
+            } catch (err) {
+                window.app.showToast('Failed to delete post: ' + err.message, 'error');
+            }
+        }
+
+        /* ── Profile Comments ─────────────────── */
+        const profileOpenComments = new Set();
+
+        async function toggleProfileComments(postId) {
+            const section = document.getElementById(`profile-comments-section-${postId}`);
+            if (!section) return;
+
+            if (profileOpenComments.has(postId)) {
+                section.innerHTML = '';
+                profileOpenComments.delete(postId);
+                return;
+            }
+
+            profileOpenComments.add(postId);
+            section.innerHTML = '<div style="text-align:center;padding:12px;color:var(--color-text-secondary);font-size:13px;"><div class="spinner spinner--sm" style="margin:0 auto;"></div></div>';
+
+            try {
+                const comments = await window.api.get(`/posts/${postId}/comments/`);
+                const commentsList = Array.isArray(comments) ? comments : (comments.results || []);
+                renderProfileComments(postId, commentsList);
+            } catch (err) {
+                section.innerHTML = '<div style="padding:12px;text-align:center;color:var(--color-text-secondary);font-size:13px;">Failed to load comments.</div>';
+            }
+        }
+
+        function renderProfileComments(postId, comments) {
+            const section = document.getElementById(`profile-comments-section-${postId}`);
+            if (!section) return;
+            const currentUser = window.auth.getCurrentUser();
+            const userAvatar = currentUser?.avatar || window.app.getInitialsAvatar(currentUser?.username || 'U', 32);
+
+            const commentsHtml = comments.map(c => {
+                const cAuthor = c.author || {};
+                const cAvatar = cAuthor.avatar || window.app.getInitialsAvatar(cAuthor.username || 'U', 32);
+                const cName = `${cAuthor.first_name || ''} ${cAuthor.last_name || ''}`.trim() || cAuthor.username || 'User';
+                const cTime = c.time_ago || window.app.timeAgo(c.created_at);
+                const isOwnComment = currentUser && cAuthor.id === currentUser.id;
+
+                return `
+                    <div style="display:flex;gap:8px;margin-bottom:12px;" id="profile-comment-${c.id}">
+                        <img style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;" src="${cAvatar}" alt="${window.app.escapeHtml(cName)}">
+                        <div style="flex:1;min-width:0;">
+                            <div style="background:var(--color-bg-hover);border-radius:0 8px 8px 8px;padding:8px 12px;">
+                                <div style="font-weight:600;font-size:13px;">${window.app.escapeHtml(cName)}</div>
+                                <div style="font-size:13px;line-height:1.5;margin-top:2px;word-wrap:break-word;">${window.app.escapeHtml(c.content)}</div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:12px;margin-top:4px;font-size:12px;color:var(--color-text-secondary);">
+                                <span>${cTime}</span>
+                                ${isOwnComment ? `<button style="border:none;background:none;color:var(--color-text-secondary);font-size:12px;cursor:pointer;padding:0;" class="profile-comment-delete" data-comment-id="${c.id}" data-post-id="${postId}">Delete</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            section.innerHTML = `
+                <div style="border-top:1px solid var(--color-border);padding:12px 16px;">
+                    <div id="profile-comments-list-${postId}">${commentsHtml}</div>
+                    <div style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--color-border);">
+                        <img style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;" src="${userAvatar}" alt="You">
+                        <div style="flex:1;display:flex;align-items:center;border:1px solid var(--color-border);border-radius:24px;padding:0 4px 0 14px;">
+                            <input type="text" style="flex:1;height:36px;border:none;outline:none;font-size:13px;background:transparent;" id="profile-comment-input-${postId}" placeholder="Add a comment..." maxlength="1000">
+                            <button style="padding:4px 12px;font-size:13px;font-weight:600;color:var(--color-primary);border:none;background:none;cursor:pointer;white-space:nowrap;" id="profile-comment-submit-${postId}">Post</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Submit comment
+            document.getElementById(`profile-comment-submit-${postId}`).addEventListener('click', () => submitProfileComment(postId));
+            document.getElementById(`profile-comment-input-${postId}`).addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') document.getElementById(`profile-comment-submit-${postId}`).click();
+            });
+
+            // Delete comment buttons
+            section.querySelectorAll('.profile-comment-delete').forEach(btn => {
+                btn.addEventListener('click', () => deleteProfileComment(parseInt(btn.dataset.postId), parseInt(btn.dataset.commentId)));
+            });
+
+            document.getElementById(`profile-comment-input-${postId}`).focus();
+        }
+
+        async function submitProfileComment(postId) {
+            const input = document.getElementById(`profile-comment-input-${postId}`);
+            const content = input?.value.trim();
+            if (!content) return;
+
+            const submitBtn = document.getElementById(`profile-comment-submit-${postId}`);
+            submitBtn.disabled = true;
+
+            try {
+                const newComment = await window.api.post(`/posts/${postId}/comments/`, { content });
+
+                // Re-fetch and render all comments to keep it simple
+                const comments = await window.api.get(`/posts/${postId}/comments/`);
+                const commentsList = Array.isArray(comments) ? comments : (comments.results || []);
+                renderProfileComments(postId, commentsList);
+
+                // Update count
+                const countEl = document.getElementById(`profile-comments-count-${postId}`);
+                if (countEl) {
+                    const newCount = parseInt(countEl.textContent || 0) + 1;
+                    countEl.textContent = newCount;
+                    countEl.parentElement.innerHTML = `<span id="profile-comments-count-${postId}">${newCount}</span> comment${newCount !== 1 ? 's' : ''}`;
+                }
+            } catch (err) {
+                window.app.showToast('Failed to post comment.', 'error');
+                submitBtn.disabled = false;
+            }
+        }
+
+        async function deleteProfileComment(postId, commentId) {
+            try {
+                await window.api.delete(`/posts/${postId}/comments/${commentId}/`);
+                const el = document.getElementById(`profile-comment-${commentId}`);
+                if (el) {
+                    el.style.opacity = '0';
+                    el.style.transition = 'opacity 200ms ease';
+                    setTimeout(() => el.remove(), 200);
+                }
+                const countEl = document.getElementById(`profile-comments-count-${postId}`);
+                if (countEl) {
+                    const newCount = Math.max(0, parseInt(countEl.textContent || 0) - 1);
+                    countEl.textContent = newCount;
+                    countEl.parentElement.innerHTML = `<span id="profile-comments-count-${postId}">${newCount}</span> comment${newCount !== 1 ? 's' : ''}`;
+                }
+                window.app.showToast('Comment deleted.', 'success');
+            } catch (err) {
+                window.app.showToast('Failed to delete comment.', 'error');
             }
         }
 
@@ -861,3 +1147,4 @@
     </script>
 </body>
 </html>
+

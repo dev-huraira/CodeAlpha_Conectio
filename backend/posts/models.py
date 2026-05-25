@@ -11,20 +11,14 @@ class Post(models.Model):
     image = models.ImageField(upload_to='posts/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    likes_count = models.IntegerField(default=0)
+    comments_count = models.IntegerField(default=0)
 
     class Meta:
         ordering = ['-created_at']
 
     def __str__(self):
         return f"{self.author.username}: {self.content[:50]}"
-
-    @property
-    def likes_count(self):
-        return self.likes.count()
-
-    @property
-    def comments_count(self):
-        return self.comments.count()
 
 
 class Like(models.Model):
