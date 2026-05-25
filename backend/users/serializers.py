@@ -74,3 +74,32 @@ class UserMinimalSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'avatar', 'headline']
+
+
+class UpdateProfileSerializer(serializers.ModelSerializer):
+    """Serializer for updating user profile fields."""
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'bio', 'headline', 'website']
+
+    def validate_bio(self, value):
+        if len(value) > 300:
+            raise serializers.ValidationError('Bio must be 300 characters or fewer.')
+        return value
+
+    def validate_headline(self, value):
+        if len(value) > 120:
+            raise serializers.ValidationError('Headline must be 120 characters or fewer.')
+        return value
+
+
+class AvatarUploadSerializer(serializers.Serializer):
+    """Serializer for avatar file upload validation."""
+    avatar = serializers.ImageField()
+
+    def validate_avatar(self, value):
+        # Max 5MB
+        if value.size > 5 * 1024 * 1024:
+            raise serializers.ValidationError('Avatar file size must be under 5MB.')
+        return value

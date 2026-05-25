@@ -1,6 +1,7 @@
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 
@@ -11,6 +12,8 @@ from .serializers import (
     UserPublicSerializer,
     UserPrivateSerializer,
     UserMinimalSerializer,
+    UpdateProfileSerializer,
+    AvatarUploadSerializer,
 )
 
 User = get_user_model()
@@ -169,3 +172,45 @@ class SuggestedUsersView(generics.ListAPIView):
         return User.objects.exclude(
             id__in=list(following_ids) + [self.request.user.id]
         )[:10]
+
+
+class UpdateProfileView(APIView):
+    """PATCH /api/users/me/update/ — Update own profile fields."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request):
+        serializer = UpdateProfileSerializer(
+            request.user, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        # Return updated full profile
+        profile_data = UserPrivateSerializer(
+            request.user, context={'request': request}
+        ).data
+        return Response(profile_data)
+
+
+class AvatarUploadView(APIView):
+    """POST /api/users/me/avatar/ — Upload avatar image."""
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        serializer = AvatarUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        avatar_file = serializer.validated_data['avatar']
+        user = request.user
+        # Delete old avatar file if exists
+        if user.avatar:
+            user.avatar.delete(save=False)
+        user.avatar = avatar_file
+        user.save(update_fields=['avatar'])
+
+        avatar_url = request.build_absolute_uri(user.avatar.url)
+        return Response({
+            'avatar': avatar_url,
+            'message': 'Avatar uploaded successfully.',
+        })

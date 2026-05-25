@@ -151,7 +151,7 @@ function setupDropdowns() {
 
 
 /* ── Toast Notifications ───────────────────── */
-function showToast(message, type = 'info', duration = 4000) {
+function showToast(message, type = 'success', duration = 3000) {
     // Create toast container if it doesn't exist
     let container = document.getElementById('toast-container');
     if (!container) {
@@ -159,24 +159,38 @@ function showToast(message, type = 'info', duration = 4000) {
         container.id = 'toast-container';
         container.style.cssText = `
             position: fixed;
-            top: 68px;
+            bottom: 16px;
             right: 16px;
             z-index: 2000;
             display: flex;
-            flex-direction: column;
+            flex-direction: column-reverse;
             gap: 8px;
             max-width: 380px;
         `;
         document.body.appendChild(container);
     }
 
+    const colorMap = {
+        success: '#057642',
+        error: '#CC1016',
+        info: '#0A66C2',
+    };
+
     const toast = document.createElement('div');
-    toast.className = `alert alert--${type}`;
     toast.style.cssText = `
-        animation: slideInRight 300ms ease-out;
+        background: ${colorMap[type] || colorMap.success};
+        color: #FFFFFF;
+        font-size: 14px;
+        padding: 10px 16px;
+        border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideInRight 300ms ease-out;
+        cursor: pointer;
+        max-width: 380px;
+        word-wrap: break-word;
     `;
     toast.textContent = message;
+    toast.addEventListener('click', () => toast.remove());
 
     container.appendChild(toast);
 
@@ -227,9 +241,47 @@ function timeAgo(dateString) {
 }
 
 
+/* ── Initials Avatar ──────────────────────── */
+/**
+ * Generates an inline SVG data URL of a colored circle with
+ * the first 2 letters of the username.
+ * @param {string} username
+ * @param {number} size - pixel size of the SVG
+ * @returns {string} data URL
+ */
+function getInitialsAvatar(username, size = 48) {
+    const colors = ['#0A66C2', '#057642', '#B24020', '#8B3A8F', '#C37D16'];
+    let charSum = 0;
+    for (let i = 0; i < username.length; i++) {
+        charSum += username.charCodeAt(i);
+    }
+    const color = colors[charSum % colors.length];
+    const initials = username.substring(0, 2).toUpperCase();
+    const fontSize = Math.round(size * 0.4);
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+        <rect width="${size}" height="${size}" rx="${size / 2}" fill="${color}"/>
+        <text x="50%" y="50%" dy=".1em" fill="white" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" font-size="${fontSize}" font-weight="600" text-anchor="middle" dominant-baseline="central">${initials}</text>
+    </svg>`;
+
+    return 'data:image/svg+xml,' + encodeURIComponent(svg);
+}
+
+
+/* ── HTML Escaping ─────────────────────────── */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+
 /* ── Export utilities ──────────────────────── */
 window.app = {
     renderNavbar,
     showToast,
     timeAgo,
+    getInitialsAvatar,
+    escapeHtml,
 };
+

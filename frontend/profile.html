@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Your Conectio profile — showcase your professional identity.">
+    <meta name="description" content="Your Conectio profile — showcase your professional identity and connect with purpose.">
     <title>Profile — Conectio</title>
 
     <link rel="stylesheet" href="assets/css/main.css">
@@ -11,87 +11,312 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230A66C2'/><text x='16' y='23' font-family='Arial' font-size='20' font-weight='bold' fill='white' text-anchor='middle'>C</text></svg>">
 
     <style>
+        /* ── Profile Layout ────────────────────────── */
+        .profile-layout {
+            max-width: 920px;
+            margin: var(--space-lg) auto;
+            padding: 0 var(--space-base);
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: var(--space-lg);
+            align-items: start;
+        }
+
+        /* ── Profile Banner ────────────────────────── */
         .profile-banner {
             width: 100%;
-            height: 200px;
-            background: linear-gradient(135deg, #0A66C2 0%, #004182 50%, #002856 100%);
+            height: 100px;
+            background: linear-gradient(135deg, #1D4ED8 0%, #0A66C2 40%, #0284C7 100%);
             border-radius: var(--radius-md) var(--radius-md) 0 0;
             position: relative;
         }
-        .profile-header {
-            position: relative;
-            padding: 0 var(--space-lg) var(--space-lg);
-            margin-top: -48px;
+
+        /* ── Profile Card (Left) ───────────────────── */
+        .profile-card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
         }
-        .profile-header__avatar {
-            width: 120px;
-            height: 120px;
+
+        .profile-card__body {
+            padding: 0 var(--space-lg) var(--space-lg);
+            position: relative;
+        }
+
+        /* Avatar */
+        .profile-avatar-wrap {
+            margin-top: -36px;
+            position: relative;
+            width: 72px;
+            height: 72px;
+        }
+
+        .profile-avatar-wrap img,
+        .profile-avatar-wrap .avatar-initials {
+            width: 72px;
+            height: 72px;
             border-radius: var(--radius-full);
-            border: 4px solid var(--color-bg-card);
+            border: 3px solid var(--color-bg-card);
             object-fit: cover;
-            background: var(--color-primary-light);
+            display: block;
+        }
+
+        .avatar-initials {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-primary);
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .profile-avatar-wrap--editable {
+            cursor: pointer;
+            transition: opacity var(--transition-fast);
+        }
+
+        .profile-avatar-wrap--editable:hover {
+            opacity: 0.85;
+        }
+
+        .profile-avatar-wrap--editable::after {
+            content: '📷';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 24px;
+            height: 24px;
+            background: var(--color-bg-card);
+            border-radius: var(--radius-full);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 42px;
-            font-weight: 700;
-            color: var(--color-primary);
+            font-size: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-        .profile-header__info {
-            margin-top: var(--space-md);
-        }
-        .profile-header__name {
-            font-size: var(--font-size-xl);
+
+        .avatar-uploading {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
             font-weight: 600;
         }
-        .profile-header__headline {
-            color: var(--color-text-secondary);
-            font-size: var(--font-size-md);
-            margin-top: var(--space-xs);
+
+        /* Info */
+        .profile-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: var(--space-md);
+            line-height: 1.3;
         }
-        .profile-header__location {
+
+        .profile-headline {
+            font-size: 14px;
             color: var(--color-text-secondary);
-            font-size: var(--font-size-sm);
             margin-top: var(--space-xs);
+            line-height: 1.4;
         }
-        .profile-header__stats {
+
+        .profile-bio {
+            font-size: 14px;
+            margin-top: var(--space-sm);
+            line-height: 1.6;
+            color: var(--color-text-primary);
+        }
+
+        .profile-website {
+            margin-top: var(--space-sm);
+        }
+
+        .profile-website a {
+            color: var(--color-text-link);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .profile-website a:hover {
+            text-decoration: underline;
+        }
+
+        /* Stats */
+        .profile-stats {
             display: flex;
             gap: var(--space-lg);
-            margin-top: var(--space-md);
-            font-size: var(--font-size-sm);
+            padding: var(--space-md) 0;
+            margin-top: var(--space-sm);
+            border-top: 1px solid var(--color-border);
+            font-size: 14px;
         }
-        .profile-header__stat-value {
-            font-weight: 600;
+
+        .profile-stats__item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .profile-stats__value {
+            font-weight: 700;
             color: var(--color-primary);
+            font-size: 16px;
         }
+
+        .profile-stats__label {
+            color: var(--color-text-secondary);
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        /* Actions */
         .profile-actions {
             display: flex;
             gap: var(--space-sm);
+            margin-top: var(--space-md);
+        }
+
+        .profile-actions .btn-primary,
+        .profile-actions .btn-secondary {
+            flex: 1;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        /* ── Edit Form ─────────────────────────────── */
+        .edit-form-card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            padding: var(--space-lg);
             margin-top: var(--space-base);
+            animation: slideDown 300ms ease-out;
         }
-        .profile-section {
-            margin-top: var(--space-lg);
+
+        .edit-form-card[hidden] {
+            display: none;
         }
-        .profile-section__title {
-            font-size: var(--font-size-lg);
+
+        .edit-form__title {
+            font-size: 18px;
             font-weight: 600;
-            margin-bottom: var(--space-md);
+            margin-bottom: var(--space-base);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
         }
+
+        .edit-form__row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-md);
+        }
+
+        .edit-form__actions {
+            display: flex;
+            gap: var(--space-sm);
+            margin-top: var(--space-lg);
+            justify-content: flex-end;
+        }
+
+        .edit-form__actions .btn-primary {
+            min-width: 130px;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Activity Card (Right) ─────────────────── */
+        .activity-card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            padding: var(--space-lg);
+        }
+
+        .activity-card__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-base);
+        }
+
+        .activity-card__title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .activity-card__count {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            background: var(--color-bg-hover);
+            padding: 2px 10px;
+            border-radius: var(--radius-pill);
+            font-weight: 600;
+        }
+
         .post-item {
             padding: var(--space-base) 0;
             border-bottom: 1px solid var(--color-border);
         }
+
         .post-item:last-child {
             border-bottom: none;
         }
+
         .post-item__content {
-            margin-top: var(--space-sm);
             line-height: 1.6;
+            font-size: 14px;
         }
+
         .post-item__meta {
             color: var(--color-text-secondary);
             font-size: var(--font-size-sm);
             margin-top: var(--space-sm);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--space-xl) var(--space-base);
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state__icon {
+            font-size: 48px;
+            margin-bottom: var(--space-md);
+            opacity: 0.5;
+        }
+
+        .empty-state__text {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* ── Joined Badge ──────────────────────────── */
+        .joined-date {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── Responsive ────────────────────────────── */
+        @media (max-width: 768px) {
+            .profile-layout {
+                grid-template-columns: 1fr;
+            }
+            .edit-form__row {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -112,58 +337,137 @@
     <div class="navbar-spacer"></div>
 
 
-    <!-- ═══════════════ PROFILE ═══════════════ -->
-    <main style="max-width: 800px; margin: var(--space-lg) auto; padding: 0 var(--space-base);">
-
-        <!-- Loading state -->
-        <div id="profile-loading" class="card-shadow text-center" style="padding: 48px;">
+    <!-- ═══════════════ LOADING STATE ═══════════════ -->
+    <div id="profile-loading" style="max-width: 920px; margin: var(--space-2xl) auto; padding: 0 var(--space-base);">
+        <div class="card-shadow text-center" style="padding: 48px;">
             <div class="spinner" style="margin: 0 auto;"></div>
             <p class="text-muted" style="margin-top: 16px;">Loading profile...</p>
         </div>
+    </div>
 
-        <!-- Profile content (hidden until loaded) -->
-        <div id="profile-content" style="display: none;">
-            <div class="card-shadow" style="padding: 0; overflow: hidden;">
+    <!-- ═══════════════ PROFILE CONTENT ═══════════════ -->
+    <main class="profile-layout" id="profile-content" style="display: none;">
+
+        <!-- LEFT COLUMN — Profile Card -->
+        <div class="profile-left-col">
+            <div class="profile-card" id="profile-card">
                 <div class="profile-banner" id="profile-banner"></div>
-                <div class="profile-header">
-                    <div class="profile-header__avatar" id="profile-avatar">?</div>
-                    <div class="profile-header__info">
-                        <h1 class="profile-header__name" id="profile-name">—</h1>
-                        <p class="profile-header__headline" id="profile-headline"></p>
-                        <p class="profile-header__location" id="profile-location"></p>
-                        <div class="profile-header__stats">
-                            <span><span class="profile-header__stat-value" id="profile-followers">0</span> followers</span>
-                            <span><span class="profile-header__stat-value" id="profile-following">0</span> following</span>
+                <div class="profile-card__body">
+                    <!-- Avatar -->
+                    <div class="profile-avatar-wrap" id="profile-avatar-wrap">
+                        <div class="avatar-initials" id="profile-avatar">?</div>
+                    </div>
+
+                    <!-- Name & Info -->
+                    <h1 class="profile-name" id="profile-name">—</h1>
+                    <p class="profile-headline" id="profile-headline"></p>
+                    <p class="profile-bio" id="profile-bio"></p>
+                    <div class="profile-website" id="profile-website-wrap" style="display:none;">
+                        <a href="#" id="profile-website" target="_blank" rel="noopener noreferrer"></a>
+                    </div>
+                    <div class="joined-date" id="profile-joined">
+                        📅 <span id="profile-joined-text"></span>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="profile-stats">
+                        <div class="profile-stats__item">
+                            <span class="profile-stats__value" id="profile-followers">0</span>
+                            <span class="profile-stats__label">Followers</span>
+                        </div>
+                        <div class="profile-stats__item">
+                            <span class="profile-stats__value" id="profile-following">0</span>
+                            <span class="profile-stats__label">Following</span>
+                        </div>
+                        <div class="profile-stats__item">
+                            <span class="profile-stats__value" id="profile-posts-count">0</span>
+                            <span class="profile-stats__label">Posts</span>
                         </div>
                     </div>
+
+                    <!-- Action Buttons -->
                     <div class="profile-actions" id="profile-actions"></div>
                 </div>
             </div>
 
-            <!-- Bio section -->
-            <div class="card-shadow profile-section" id="profile-bio-section" style="display: none;">
-                <h2 class="profile-section__title">About</h2>
-                <p id="profile-bio" style="line-height: 1.6;"></p>
+            <!-- Edit Form (inline, below card) -->
+            <div class="edit-form-card" id="edit-form" hidden>
+                <div class="edit-form__title">✏️ Edit Profile</div>
+                <form id="edit-profile-form" autocomplete="off">
+                    <div class="edit-form__row">
+                        <div class="form-group">
+                            <label class="form-label" for="edit-first-name">First Name</label>
+                            <input type="text" class="input-field" id="edit-first-name" placeholder="First name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="edit-last-name">Last Name</label>
+                            <input type="text" class="input-field" id="edit-last-name" placeholder="Last name">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-headline">Headline</label>
+                        <input type="text" class="input-field" id="edit-headline" placeholder="e.g. Software Engineer at Google" maxlength="120">
+                        <div class="form-hint"><span id="headline-char-count">0</span>/120</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-bio">Bio</label>
+                        <textarea class="textarea-field" id="edit-bio" placeholder="Tell people about yourself..." maxlength="300" rows="3"></textarea>
+                        <div class="form-hint"><span id="bio-char-count">0</span>/300</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-website">Website</label>
+                        <input type="url" class="input-field" id="edit-website" placeholder="https://yourwebsite.com">
+                    </div>
+                    <div class="edit-form__actions">
+                        <button type="button" class="btn-secondary btn-secondary--sm" id="edit-cancel-btn">Cancel</button>
+                        <button type="submit" class="btn-primary btn-primary--sm" id="edit-save-btn">Save changes</button>
+                    </div>
+                </form>
             </div>
+        </div>
 
-            <!-- Posts section -->
-            <div class="card-shadow profile-section">
-                <h2 class="profile-section__title">Posts</h2>
+        <!-- RIGHT COLUMN — Activity -->
+        <div class="profile-right-col">
+            <div class="activity-card">
+                <div class="activity-card__header">
+                    <h2 class="activity-card__title">Posts</h2>
+                    <span class="activity-card__count" id="activity-post-count">0</span>
+                </div>
                 <div id="profile-posts">
-                    <p class="text-muted">No posts yet.</p>
+                    <div class="empty-state">
+                        <div class="empty-state__icon">📝</div>
+                        <p class="empty-state__text">No posts yet. Share your thoughts!</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Not logged in state -->
-        <div id="profile-auth-required" style="display: none;">
+    </main>
+
+
+    <!-- ═══════════════ AUTH REQUIRED ═══════════════ -->
+    <div id="profile-auth-required" style="display: none;">
+        <div style="max-width: 480px; margin: var(--space-2xl) auto; padding: 0 var(--space-base);">
             <div class="card-shadow text-center" style="padding: 48px;">
-                <h2 style="margin-bottom: 8px;">Sign in to view your profile</h2>
-                <p class="text-muted" style="margin-bottom: 24px;">You need to be logged in to access your profile.</p>
+                <div style="font-size: 48px; margin-bottom: 16px;">🔒</div>
+                <h2 style="margin-bottom: 8px;">Sign in to view profiles</h2>
+                <p class="text-muted" style="margin-bottom: 24px;">You need to be logged in to access profiles.</p>
                 <a href="login.html" class="btn-primary">Sign in</a>
             </div>
         </div>
-    </main>
+    </div>
+
+    <!-- ═══════════════ NOT FOUND ═══════════════ -->
+    <div id="profile-not-found" style="display: none;">
+        <div style="max-width: 480px; margin: var(--space-2xl) auto; padding: 0 var(--space-base);">
+            <div class="card-shadow text-center" style="padding: 48px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+                <h2 style="margin-bottom: 8px;">User not found</h2>
+                <p class="text-muted" style="margin-bottom: 24px;">This profile doesn't exist or may have been removed.</p>
+                <a href="index.html" class="btn-secondary">Back to Home</a>
+            </div>
+        </div>
+    </div>
 
 
     <!-- ═══════════════ FOOTER ═══════════════ -->
@@ -172,87 +476,388 @@
     </footer>
 
 
-    <!-- Scripts -->
+    <!-- ═══════════════ SCRIPTS ═══════════════ -->
     <script src="assets/js/api.js"></script>
     <script src="assets/js/auth.js"></script>
     <script src="assets/js/main.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const loadingEl = document.getElementById('profile-loading');
-            const contentEl = document.getElementById('profile-content');
-            const authReqEl = document.getElementById('profile-auth-required');
+    (function() {
+        'use strict';
 
-            if (!window.auth.isLoggedIn()) {
+        /* ── State ─────────────────────────────── */
+        let profileData = null;
+        let isOwnProfile = false;
+        let avatarFile = null;
+
+        /* ── DOM refs ──────────────────────────── */
+        const loadingEl   = document.getElementById('profile-loading');
+        const contentEl   = document.getElementById('profile-content');
+        const authReqEl   = document.getElementById('profile-auth-required');
+        const notFoundEl  = document.getElementById('profile-not-found');
+        const editFormEl  = document.getElementById('edit-form');
+        const editFormTag = document.getElementById('edit-profile-form');
+
+        /* ── Init ──────────────────────────────── */
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Determine whose profile to load
+            const params = new URLSearchParams(window.location.search);
+            const usernameParam = params.get('username');
+
+            const loggedIn = window.auth.isLoggedIn();
+            const currentUser = loggedIn ? window.auth.getCurrentUser() : null;
+
+            // If viewing another user's profile, no auth strictly required for the GET
+            // but our API requires auth by default, so check login
+            if (!loggedIn && !usernameParam) {
                 loadingEl.style.display = 'none';
                 authReqEl.style.display = 'block';
                 return;
             }
 
+            // Determine if own profile
+            if (!usernameParam || (currentUser && usernameParam === currentUser.username)) {
+                isOwnProfile = true;
+            }
+
             try {
-                const profile = await window.api.get('/users/me/');
-
-                // Populate profile data
-                document.getElementById('profile-name').textContent = profile.full_name || profile.username;
-                document.getElementById('profile-headline').textContent = profile.headline || '';
-                document.getElementById('profile-location').textContent = '';
-                document.getElementById('profile-followers').textContent = profile.followers_count || 0;
-                document.getElementById('profile-following').textContent = profile.following_count || 0;
-
-                // Avatar
-                const avatarEl = document.getElementById('profile-avatar');
-                if (profile.avatar) {
-                    const img = document.createElement('img');
-                    img.src = profile.avatar;
-                    img.alt = profile.full_name;
-                    img.className = 'profile-header__avatar';
-                    avatarEl.replaceWith(img);
+                if (isOwnProfile) {
+                    profileData = await window.api.get('/users/me/');
                 } else {
-                    const initials = (profile.full_name || profile.username || '?').charAt(0).toUpperCase();
-                    avatarEl.textContent = initials;
+                    profileData = await window.api.get(`/users/${usernameParam}/`);
                 }
-
-                // Bio
-                if (profile.bio) {
-                    document.getElementById('profile-bio').textContent = profile.bio;
-                    document.getElementById('profile-bio-section').style.display = 'block';
-                }
-
-                // Load user posts
-                try {
-                    const posts = await window.api.get(`/posts/user/${profile.username}/`);
-                    const postsContainer = document.getElementById('profile-posts');
-                    
-                    if (posts.results && posts.results.length > 0) {
-                        postsContainer.innerHTML = posts.results.map(post => `
-                            <div class="post-item">
-                                <div class="post-item__content">${escapeHtml(post.content)}</div>
-                                <div class="post-item__meta">
-                                    ❤️ ${post.likes_count} · 💬 ${post.comments_count} · ${window.app.timeAgo(post.created_at)}
-                                </div>
-                            </div>
-                        `).join('');
-                    }
-                } catch (e) {
-                    // Posts loading failed — non-critical
-                }
-
-                loadingEl.style.display = 'none';
-                contentEl.style.display = 'block';
-
+                renderProfile();
+                loadPosts(profileData.username);
             } catch (err) {
-                loadingEl.innerHTML = `
-                    <div class="alert alert--error">Failed to load profile. ${err.message}</div>
-                    <a href="index.html" class="btn-secondary" style="margin-top: 16px;">Back to Home</a>
-                `;
+                loadingEl.style.display = 'none';
+                if (err.status === 404) {
+                    notFoundEl.style.display = 'block';
+                } else if (err.status === 401) {
+                    authReqEl.style.display = 'block';
+                } else {
+                    loadingEl.style.display = 'block';
+                    loadingEl.innerHTML = `
+                        <div class="card-shadow text-center" style="padding: 48px;">
+                            <div class="alert alert--error">Failed to load profile. ${window.app.escapeHtml(err.message)}</div>
+                            <a href="index.html" class="btn-secondary" style="margin-top: 16px;">Back to Home</a>
+                        </div>
+                    `;
+                }
             }
         });
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+
+        /* ── Render Profile ────────────────────── */
+        function renderProfile() {
+            const p = profileData;
+
+            // Page title
+            document.title = `${p.full_name || p.username} — Conectio`;
+
+            // Avatar
+            renderAvatar(p);
+
+            // Name & info
+            document.getElementById('profile-name').textContent = p.full_name || p.username;
+            document.getElementById('profile-headline').textContent = p.headline || '';
+            document.getElementById('profile-bio').textContent = p.bio || '';
+
+            // Hide bio paragraph if empty
+            document.getElementById('profile-bio').style.display = p.bio ? 'block' : 'none';
+
+            // Headline hide if empty
+            document.getElementById('profile-headline').style.display = p.headline ? 'block' : 'none';
+
+            // Website
+            if (p.website) {
+                const websiteWrap = document.getElementById('profile-website-wrap');
+                const websiteLink = document.getElementById('profile-website');
+                websiteWrap.style.display = 'block';
+                websiteLink.href = p.website;
+                websiteLink.textContent = '🔗 ' + p.website.replace(/^https?:\/\//, '');
+            } else {
+                document.getElementById('profile-website-wrap').style.display = 'none';
+            }
+
+            // Joined date
+            if (p.date_joined) {
+                const date = new Date(p.date_joined);
+                document.getElementById('profile-joined-text').textContent =
+                    'Joined ' + date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            }
+
+            // Stats
+            document.getElementById('profile-followers').textContent = p.followers_count || 0;
+            document.getElementById('profile-following').textContent = p.following_count || 0;
+            document.getElementById('profile-posts-count').textContent = p.posts_count || 0;
+            document.getElementById('activity-post-count').textContent = p.posts_count || 0;
+
+            // Action buttons
+            renderActions();
+
+            // Show content
+            loadingEl.style.display = 'none';
+            contentEl.style.display = 'grid';
         }
+
+
+        /* ── Avatar Rendering ──────────────────── */
+        function renderAvatar(p) {
+            const wrap = document.getElementById('profile-avatar-wrap');
+            wrap.innerHTML = '';
+
+            if (isOwnProfile) {
+                wrap.classList.add('profile-avatar-wrap--editable');
+                wrap.title = 'Click to change avatar';
+            } else {
+                wrap.classList.remove('profile-avatar-wrap--editable');
+                wrap.title = '';
+            }
+
+            if (p.avatar) {
+                const img = document.createElement('img');
+                img.src = p.avatar;
+                img.alt = p.full_name || p.username;
+                img.id = 'profile-avatar';
+                wrap.appendChild(img);
+            } else {
+                const img = document.createElement('img');
+                img.src = window.app.getInitialsAvatar(p.username, 72);
+                img.alt = p.full_name || p.username;
+                img.id = 'profile-avatar';
+                img.classList.add('avatar-initials');
+                img.style.border = '3px solid var(--color-bg-card)';
+                wrap.appendChild(img);
+            }
+        }
+
+
+        /* ── Action Buttons ────────────────────── */
+        function renderActions() {
+            const actionsEl = document.getElementById('profile-actions');
+
+            if (isOwnProfile) {
+                actionsEl.innerHTML = `
+                    <button class="btn-secondary" id="btn-edit-profile">✏️ Edit profile</button>
+                `;
+                document.getElementById('btn-edit-profile').addEventListener('click', toggleEditForm);
+
+                // Avatar click → file upload
+                const wrap = document.getElementById('profile-avatar-wrap');
+                wrap.addEventListener('click', () => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.onchange = handleAvatarSelect;
+                    input.click();
+                });
+            } else {
+                actionsEl.innerHTML = `
+                    <button class="btn-primary" id="btn-follow">Follow</button>
+                    <button class="btn-secondary" id="btn-message">Message</button>
+                `;
+                document.getElementById('btn-follow').addEventListener('click', handleFollow);
+                document.getElementById('btn-message').addEventListener('click', () => {
+                    window.app.showToast('Messaging coming soon!', 'info');
+                });
+            }
+        }
+
+
+        /* ── Edit Form Toggle ──────────────────── */
+        function toggleEditForm() {
+            const isHidden = editFormEl.hidden;
+            editFormEl.hidden = !isHidden;
+
+            if (isHidden) {
+                // Populate fields
+                document.getElementById('edit-first-name').value = profileData.first_name || '';
+                document.getElementById('edit-last-name').value = profileData.last_name || '';
+                document.getElementById('edit-headline').value = profileData.headline || '';
+                document.getElementById('edit-bio').value = profileData.bio || '';
+                document.getElementById('edit-website').value = profileData.website || '';
+                updateCharCounts();
+                // Scroll to form
+                editFormEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // Cancel button
+        document.getElementById('edit-cancel-btn').addEventListener('click', () => {
+            editFormEl.hidden = true;
+            avatarFile = null;
+        });
+
+        // Char count updates
+        document.getElementById('edit-headline').addEventListener('input', updateCharCounts);
+        document.getElementById('edit-bio').addEventListener('input', updateCharCounts);
+
+        function updateCharCounts() {
+            document.getElementById('headline-char-count').textContent =
+                document.getElementById('edit-headline').value.length;
+            document.getElementById('bio-char-count').textContent =
+                document.getElementById('edit-bio').value.length;
+        }
+
+
+        /* ── Avatar Selection & Preview ────────── */
+        function handleAvatarSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validate type
+            if (!file.type.startsWith('image/')) {
+                window.app.showToast('Please select an image file.', 'error');
+                return;
+            }
+
+            // Validate size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                window.app.showToast('Image must be under 5MB.', 'error');
+                return;
+            }
+
+            avatarFile = file;
+
+            // Show preview immediately
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const avatarImg = document.getElementById('profile-avatar');
+                if (avatarImg) {
+                    avatarImg.src = ev.target.result;
+                    avatarImg.classList.remove('avatar-initials');
+                }
+            };
+            reader.readAsDataURL(file);
+
+            // Upload immediately
+            uploadAvatar(file);
+        }
+
+        async function uploadAvatar(file) {
+            const wrap = document.getElementById('profile-avatar-wrap');
+
+            // Show uploading overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'avatar-uploading';
+            overlay.textContent = 'Uploading...';
+            wrap.appendChild(overlay);
+
+            try {
+                const formData = new FormData();
+                formData.append('avatar', file);
+
+                const result = await window.api.post('/users/me/avatar/', formData);
+                profileData.avatar = result.avatar;
+                window.app.showToast('Avatar updated!', 'success');
+            } catch (err) {
+                window.app.showToast('Failed to upload avatar: ' + err.message, 'error');
+                // Revert preview
+                renderAvatar(profileData);
+            } finally {
+                overlay.remove();
+                avatarFile = null;
+            }
+        }
+
+
+        /* ── Save Profile ──────────────────────── */
+        editFormTag.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const saveBtn = document.getElementById('edit-save-btn');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Saving...';
+            saveBtn.disabled = true;
+
+            try {
+                const payload = {
+                    first_name: document.getElementById('edit-first-name').value.trim(),
+                    last_name: document.getElementById('edit-last-name').value.trim(),
+                    headline: document.getElementById('edit-headline').value.trim(),
+                    bio: document.getElementById('edit-bio').value.trim(),
+                    website: document.getElementById('edit-website').value.trim(),
+                };
+
+                const updated = await window.api.patch('/users/me/update/', payload);
+
+                // Merge updated data
+                profileData = { ...profileData, ...updated };
+
+                // Update cached user in localStorage
+                window.auth.saveUser(profileData);
+
+                // Re-render
+                renderProfile();
+
+                // Close form
+                editFormEl.hidden = true;
+
+                window.app.showToast('Profile updated', 'success');
+
+                // Re-render navbar to reflect name change
+                window.app.renderNavbar();
+
+            } catch (err) {
+                const errorMsg = err.data
+                    ? Object.values(err.data).flat().join(', ')
+                    : err.message;
+                window.app.showToast('Error: ' + errorMsg, 'error');
+            } finally {
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+            }
+        });
+
+
+        /* ── Follow/Unfollow ───────────────────── */
+        async function handleFollow() {
+            const btn = document.getElementById('btn-follow');
+            if (!btn) return;
+
+            try {
+                const result = await window.api.post(`/users/follow/${profileData.username}/`);
+                if (result.status === 'followed') {
+                    btn.textContent = 'Following';
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-secondary');
+                    profileData.followers_count = (profileData.followers_count || 0) + 1;
+                } else {
+                    btn.textContent = 'Follow';
+                    btn.classList.remove('btn-secondary');
+                    btn.classList.add('btn-primary');
+                    profileData.followers_count = Math.max(0, (profileData.followers_count || 0) - 1);
+                }
+                document.getElementById('profile-followers').textContent = profileData.followers_count;
+            } catch (err) {
+                window.app.showToast('Failed: ' + err.message, 'error');
+            }
+        }
+
+
+        /* ── Load Posts ────────────────────────── */
+        async function loadPosts(username) {
+            try {
+                const data = await window.api.get(`/posts/user/${username}/`);
+                const postsContainer = document.getElementById('profile-posts');
+
+                if (data.results && data.results.length > 0) {
+                    document.getElementById('activity-post-count').textContent = data.results.length;
+                    postsContainer.innerHTML = data.results.map(post => `
+                        <div class="post-item">
+                            <div class="post-item__content">${window.app.escapeHtml(post.content)}</div>
+                            <div class="post-item__meta">
+                                ❤️ ${post.likes_count || 0} · 💬 ${post.comments_count || 0} · ${window.app.timeAgo(post.created_at)}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) {
+                // Posts endpoint may not exist yet — non-critical
+            }
+        }
+
+    })();
     </script>
 </body>
 </html>
