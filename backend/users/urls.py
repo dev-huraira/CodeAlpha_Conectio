@@ -13,6 +13,8 @@ urlpatterns = [
     path('profile/<str:username>/', views.ProfileDetailView.as_view(), name='profile-detail'),
     path('follow/<str:username>/', views.FollowView.as_view(), name='follow'),
     path('suggested/', views.SuggestedUsersView.as_view(), name='suggested'),
-    # Direct username lookup (used by frontend profile page)
+    path('<str:username>/followers/', views.FollowersListView.as_view(), name='followers-list'),
+    path('<str:username>/following/', views.FollowingListView.as_view(), name='following-list'),
+    # Direct username lookup (used by frontend profile page) — must be last
     path('<str:username>/', views.ProfileDetailView.as_view(), name='user-profile'),
 ]

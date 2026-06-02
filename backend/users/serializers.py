@@ -48,6 +48,7 @@ class UserLoginSerializer(serializers.Serializer):
 class UserPublicSerializer(serializers.ModelSerializer):
     """Public profile — safe to expose to any authenticated user."""
     full_name = serializers.ReadOnlyField()
+    is_following = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -55,9 +56,18 @@ class UserPublicSerializer(serializers.ModelSerializer):
             'id', 'username', 'email', 'first_name', 'last_name',
             'full_name', 'bio', 'avatar', 'headline',
             'followers_count', 'following_count', 'posts_count',
-            'date_joined',
+            'date_joined', 'is_following',
         ]
         read_only_fields = fields
+
+    def get_is_following(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            from .models import Connection
+            return Connection.objects.filter(
+                follower=request.user, following=obj
+            ).exists()
+        return False
 
 
 class UserPrivateSerializer(UserPublicSerializer):
@@ -103,3 +113,21 @@ class AvatarUploadSerializer(serializers.Serializer):
         if value.size > 5 * 1024 * 1024:
             raise serializers.ValidationError('Avatar file size must be under 5MB.')
         return value
+
+
+class UserFollowSerializer(UserMinimalSerializer):
+    """Extends UserMinimalSerializer with is_following for followers/following lists."""
+    is_following = serializers.SerializerMethodField()
+
+    class Meta(UserMinimalSerializer.Meta):
+        fields = UserMinimalSerializer.Meta.fields + ['is_following']
+
+    def get_is_following(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            from .models import Connection
+            return Connection.objects.filter(
+                follower=request.user, following=obj
+            ).exists()
+        return False
+

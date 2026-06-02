@@ -9,6 +9,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from posts.views import FeedView, SearchView, ExploreView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -20,6 +21,11 @@ urlpatterns = [
     # App endpoints
     path('api/users/', include('users.urls')),
     path('api/posts/', include('posts.urls')),
+
+    # Feed, Search, Explore (top-level API routes)
+    path('api/feed/', FeedView.as_view(), name='feed'),
+    path('api/search/', SearchView.as_view(), name='search'),
+    path('api/explore/', ExploreView.as_view(), name='explore'),
 ]
 
 # Serve media files in development

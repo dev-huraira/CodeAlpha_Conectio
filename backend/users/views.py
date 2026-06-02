@@ -12,6 +12,7 @@ from .serializers import (
     UserPublicSerializer,
     UserPrivateSerializer,
     UserMinimalSerializer,
+    UserFollowSerializer,
     UpdateProfileSerializer,
     AvatarUploadSerializer,
 )
@@ -127,9 +128,21 @@ class ProfileDetailView(generics.RetrieveAPIView):
     lookup_field = 'username'
     queryset = User.objects.all()
 
+    def retrieve(self, request, *args, **kwargs):
+        response = super().retrieve(request, *args, **kwargs)
+        profile_user = self.get_object()
+        if request.user.is_authenticated:
+            response.data['is_following_them'] = Connection.objects.filter(
+                follower=request.user, following=profile_user
+            ).exists()
+        else:
+            response.data['is_following_them'] = False
+        return response
+
 
 class FollowView(APIView):
     """POST /api/users/follow/<username>/ — Follow or unfollow a user."""
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, username):
         try:
@@ -146,24 +159,38 @@ class FollowView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        connection, created = Connection.objects.get_or_create(
-            follower=request.user,
-            following=target_user,
-        )
+        existing = Connection.objects.filter(
+            follower=request.user, following=target_user
+        ).first()
 
-        if not created:
-            connection.delete()
-            return Response({'status': 'unfollowed', 'username': username})
+        if existing:
+            existing.delete()
+            # Recompute actual counts from the Connection table
+            target_user.followers_count = Connection.objects.filter(following=target_user).count()
+            target_user.save(update_fields=['followers_count'])
+            request.user.following_count = Connection.objects.filter(follower=request.user).count()
+            request.user.save(update_fields=['following_count'])
+            return Response({
+                'is_following': False,
+                'followers_count': target_user.followers_count,
+            })
 
-        return Response(
-            {'status': 'followed', 'username': username},
-            status=status.HTTP_201_CREATED,
-        )
+        Connection.objects.create(follower=request.user, following=target_user)
+        # Recompute actual counts from the Connection table
+        target_user.followers_count = Connection.objects.filter(following=target_user).count()
+        target_user.save(update_fields=['followers_count'])
+        request.user.following_count = Connection.objects.filter(follower=request.user).count()
+        request.user.save(update_fields=['following_count'])
+        return Response({
+            'is_following': True,
+            'followers_count': target_user.followers_count,
+        }, status=status.HTTP_201_CREATED)
 
 
 class SuggestedUsersView(generics.ListAPIView):
     """GET /api/users/suggested/ — Users you might want to follow."""
     serializer_class = UserMinimalSerializer
+    pagination_class = None
 
     def get_queryset(self):
         following_ids = self.request.user.following_set.values_list(
@@ -171,7 +198,7 @@ class SuggestedUsersView(generics.ListAPIView):
         )
         return User.objects.exclude(
             id__in=list(following_ids) + [self.request.user.id]
-        )[:10]
+        ).order_by('?')[:5]
 
 
 class UpdateProfileView(APIView):
@@ -214,3 +241,27 @@ class AvatarUploadView(APIView):
             'avatar': avatar_url,
             'message': 'Avatar uploaded successfully.',
         })
+
+
+class FollowersListView(generics.ListAPIView):
+    """GET /api/users/<username>/followers/ — List of a user's followers."""
+    serializer_class = UserFollowSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        username = self.kwargs['username']
+        return User.objects.filter(
+            following_set__following__username=username
+        )
+
+
+class FollowingListView(generics.ListAPIView):
+    """GET /api/users/<username>/following/ — List of users someone follows."""
+    serializer_class = UserFollowSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        username = self.kwargs['username']
+        return User.objects.filter(
+            followers_set__follower__username=username
+        )

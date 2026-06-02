@@ -37,6 +37,7 @@
         @media (max-width: 768px) {
             .feed-layout {
                 grid-template-columns: 1fr;
+                padding: var(--space-sm);
             }
             .feed-sidebar-right { display: none; }
         }
@@ -49,6 +50,8 @@
             border-radius: var(--radius-md);
             overflow: hidden;
             text-align: center;
+            position: sticky;
+            top: 72px;
         }
 
         .mini-profile__banner {
@@ -105,6 +108,33 @@
         .mini-profile__stat-label {
             color: var(--color-text-secondary);
             margin-top: 1px;
+        }
+
+        .mini-profile__items {
+            border-top: 1px solid var(--color-border);
+            padding: var(--space-sm) 0;
+        }
+
+        .mini-profile__item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: 8px var(--space-md);
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            transition: background var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .mini-profile__item:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-text-primary);
+        }
+
+        .mini-profile__item-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
         }
 
         .mini-profile__link {
@@ -194,6 +224,59 @@
 
         .composer-trigger__action-icon {
             font-size: 20px;
+        }
+
+
+        /* ── Sorting Tabs ─────────────────────────── */
+        .feed-sort-tabs {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: var(--space-sm);
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .feed-sort-tab {
+            flex: 1;
+            padding: 10px 16px;
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+            text-align: center;
+        }
+
+        .feed-sort-tab:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-text-primary);
+        }
+
+        .feed-sort-tab--active {
+            color: var(--color-primary);
+            background: var(--color-primary-light);
+        }
+
+        .feed-sort-tab--active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--color-primary);
+        }
+
+        .feed-sort-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--color-border);
         }
 
 
@@ -477,9 +560,13 @@
             gap: 2px;
         }
 
-        .post-card__menu-btn {
+        .post-card__menu-wrap {
             margin-left: auto;
             flex-shrink: 0;
+            position: relative;
+        }
+
+        .post-card__menu-btn {
             width: 32px;
             height: 32px;
             display: flex;
@@ -496,6 +583,82 @@
 
         .post-card__menu-btn:hover {
             background: var(--color-bg-hover);
+        }
+
+        .post-card__dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            min-width: 200px;
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-dropdown);
+            padding: 6px 0;
+            z-index: 100;
+            animation: dropdownFadeIn 150ms ease;
+        }
+
+        @keyframes dropdownFadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .post-card__dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: var(--color-text-primary);
+            border: none;
+            background: none;
+            cursor: pointer;
+            text-align: left;
+            transition: background var(--transition-fast);
+        }
+
+        .post-card__dropdown-item:hover {
+            background: var(--color-bg-hover);
+        }
+
+        .post-card__dropdown-item--danger {
+            color: var(--color-error);
+        }
+
+        .post-card__dropdown-item--danger:hover {
+            background: rgba(204, 16, 22, 0.06);
+        }
+
+        .post-card__dropdown-icon {
+            font-size: 18px;
+            width: 22px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .post-card__dropdown-divider {
+            height: 1px;
+            background: var(--color-border);
+            margin: 4px 0;
+        }
+
+        /* Confirmation state inside dropdown */
+        .post-card__dropdown-confirm {
+            padding: 12px 16px;
+        }
+
+        .post-card__dropdown-confirm p {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .post-card__dropdown-confirm-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
         }
 
         .post-card__content {
@@ -583,26 +746,16 @@
             font-size: 18px;
         }
 
-        /* Delete confirmation */
-        .post-card__delete-confirm {
-            padding: 12px 16px;
-            background: rgba(204, 16, 22, 0.05);
-            border-top: 1px solid var(--color-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: var(--space-sm);
-            animation: slideDown 200ms ease;
+        /* Like animation */
+        @keyframes likeBlip {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.3); }
+            100% { transform: scale(1); }
         }
 
-        .post-card__delete-confirm span {
-            font-size: 13px;
-            color: var(--color-text-secondary);
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; max-height: 0; }
-            to { opacity: 1; max-height: 60px; }
+        .like-blip .post-card__action-icon {
+            display: inline-block;
+            animation: likeBlip 300ms ease;
         }
 
 
@@ -760,7 +913,91 @@
         }
 
 
+        /* ── Skeleton Loading Cards ───────────────── */
+        .skeleton-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-sm);
+            padding: 16px;
+            overflow: hidden;
+        }
+
+        .skeleton-card__header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .skeleton-card__avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+        }
+
+        .skeleton-card__lines {
+            flex: 1;
+        }
+
+        .skeleton-card__line {
+            height: 12px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .skeleton-card__line--short {
+            width: 60%;
+        }
+
+        .skeleton-card__line--xs {
+            width: 30%;
+        }
+
+        .skeleton-card__body {
+            margin-bottom: 12px;
+        }
+
+        .skeleton-card__body .skeleton-card__line {
+            height: 10px;
+        }
+
+        .skeleton-card__body .skeleton-card__line:last-child {
+            width: 80%;
+        }
+
+        .skeleton-card__footer {
+            display: flex;
+            gap: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .skeleton-card__btn {
+            height: 32px;
+            flex: 1;
+            border-radius: 4px;
+        }
+
+        /* Skeleton shimmer — tuned colors */
+        .skeleton-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.5s infinite;
+        }
+
+        @keyframes skeleton-shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+
         /* ── Right Sidebar ─────────────────────────── */
+        .feed-sidebar-right {
+            position: sticky;
+            top: 72px;
+        }
+
         .sidebar-card {
             background: var(--color-bg-card);
             border: 1px solid var(--color-border);
@@ -820,6 +1057,32 @@
             font-size: 13px;
         }
 
+        .sidebar-footer {
+            margin-top: var(--space-base);
+            text-align: center;
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            line-height: 2;
+        }
+
+        .sidebar-footer a {
+            color: var(--color-text-secondary);
+            transition: color var(--transition-fast);
+        }
+
+        .sidebar-footer a:hover {
+            color: var(--color-primary);
+            text-decoration: underline;
+        }
+
+        .sidebar-footer__brand {
+            display: block;
+            margin-top: var(--space-sm);
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+
         /* ── Feed Loading ──────────────────────────── */
         .feed-loading {
             display: flex;
@@ -839,13 +1102,16 @@
         .feed-empty {
             text-align: center;
             padding: var(--space-2xl) var(--space-base);
-            color: var(--color-text-secondary);
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-base);
         }
 
         .feed-empty__icon {
-            font-size: 56px;
+            font-size: 48px;
             margin-bottom: var(--space-md);
-            opacity: 0.4;
+            color: var(--color-primary);
         }
 
         .feed-empty__title {
@@ -858,6 +1124,66 @@
         .feed-empty__text {
             font-size: 14px;
             line-height: 1.5;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-lg);
+        }
+
+        .feed-empty__suggestions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            max-width: 360px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .feed-empty__suggestion-card {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            transition: box-shadow var(--transition-fast);
+        }
+
+        .feed-empty__suggestion-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .feed-empty__suggestion-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-full);
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .feed-empty__suggestion-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .feed-empty__suggestion-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .feed-empty__suggestion-headline {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ── Mobile Responsive ─────────────────────── */
+        @media (max-width: 768px) {
+            .composer-trigger__actions { display: none; }
+
+            .post-card__action-btn span:not(.post-card__action-icon) {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -940,9 +1266,23 @@
                                 <span class="mini-profile__stat-label">Followers</span>
                             </div>
                             <div class="mini-profile__stat">
+                                <span class="mini-profile__stat-value" id="mini-following">0</span>
+                                <span class="mini-profile__stat-label">Following</span>
+                            </div>
+                            <div class="mini-profile__stat">
                                 <span class="mini-profile__stat-value" id="mini-posts">0</span>
                                 <span class="mini-profile__stat-label">Posts</span>
                             </div>
+                        </div>
+                        <div class="mini-profile__items">
+                            <div class="mini-profile__item" onclick="window.app.showToast('Saved posts coming soon!', 'info')">
+                                <span class="mini-profile__item-icon">🔖</span>
+                                Saved posts
+                            </div>
+                            <a class="mini-profile__item" href="profile.html" style="text-decoration:none;color:inherit;">
+                                <span class="mini-profile__item-icon">👥</span>
+                                Your connections
+                            </a>
                         </div>
                         <a href="profile.html" class="mini-profile__link">View profile →</a>
                     </div>
@@ -972,11 +1312,20 @@
                         </div>
                     </div>
 
+                    <!-- Sorting Tabs -->
+                    <div class="feed-sort-tabs" id="feed-sort-tabs">
+                        <button class="feed-sort-tab feed-sort-tab--active" data-sort="recent" id="tab-recent">
+                            📰 Recent
+                        </button>
+                        <div class="feed-sort-divider"></div>
+                        <button class="feed-sort-tab" data-sort="top" id="tab-top">
+                            🔥 Top
+                        </button>
+                    </div>
+
                     <!-- Feed Posts Container -->
                     <div id="feed-posts">
-                        <div class="feed-loading" id="feed-loading">
-                            <div class="spinner"></div>
-                        </div>
+                        <!-- Skeleton cards will be rendered here -->
                     </div>
 
                     <!-- Load More -->
@@ -986,7 +1335,7 @@
                 </div>
 
 
-                <!-- RIGHT SIDEBAR — Suggested Users -->
+                <!-- RIGHT SIDEBAR — Suggested Users + Footer -->
                 <aside class="feed-sidebar-right">
                     <div class="sidebar-card">
                         <div class="sidebar-card__title">People you may know</div>
@@ -996,6 +1345,13 @@
                                 Loading suggestions...
                             </div>
                         </div>
+                    </div>
+
+                    <hr class="divider divider--lg">
+
+                    <div class="sidebar-footer">
+                        <a href="#">About</a> · <a href="#">Help</a> · <a href="#">Privacy</a> · <a href="#">Terms</a>
+                        <span class="sidebar-footer__brand">Conectio © 2025 · Connect with purpose.</span>
                     </div>
                 </aside>
 
@@ -1063,7 +1419,8 @@
         let feedHasMore = true;
         let feedLoading = false;
         let composerImageFile = null;
-        let openCommentSections = new Set(); // track which posts have comments open
+        let openCommentSections = new Set();
+        let currentSort = 'recent'; // 'recent' = /api/feed/, 'top' = /api/explore/
 
         /* ══════════════════════════════════════════
            DOM REFS
@@ -1071,7 +1428,6 @@
         const heroSection = document.getElementById('hero-section');
         const feedSection = document.getElementById('feed-section');
         const feedPosts = document.getElementById('feed-posts');
-        const feedLoadingEl = document.getElementById('feed-loading');
         const loadMoreWrap = document.getElementById('load-more-wrap');
         const loadMoreBtn = document.getElementById('load-more-btn');
 
@@ -1103,6 +1459,7 @@
 
                 renderMiniProfile();
                 setupComposer();
+                setupSortTabs();
                 loadFeed();
                 loadSuggestedUsers();
             } else {
@@ -1124,12 +1481,38 @@
             document.getElementById('mini-name').textContent = u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username;
             document.getElementById('mini-headline').textContent = u.headline || 'Conectio member';
             document.getElementById('mini-followers').textContent = u.followers_count || 0;
+            document.getElementById('mini-following').textContent = u.following_count || 0;
             document.getElementById('mini-posts').textContent = u.posts_count || 0;
 
             // Set composer avatars
             document.getElementById('composer-avatar').src = avatarSrc;
             document.getElementById('modal-author-avatar').src = avatarSrc;
             document.getElementById('modal-author-name').textContent = u.full_name || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username;
+        }
+
+
+        /* ══════════════════════════════════════════
+           SORTING TABS
+           ══════════════════════════════════════════ */
+        function setupSortTabs() {
+            const tabs = document.querySelectorAll('.feed-sort-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const sort = tab.dataset.sort;
+                    if (sort === currentSort) return;
+
+                    currentSort = sort;
+                    tabs.forEach(t => t.classList.remove('feed-sort-tab--active'));
+                    tab.classList.add('feed-sort-tab--active');
+
+                    // Reset and reload
+                    feedPage = 1;
+                    feedHasMore = true;
+                    feedPosts.innerHTML = '';
+                    loadMoreWrap.style.display = 'none';
+                    loadFeed();
+                });
+            });
         }
 
 
@@ -1273,6 +1656,53 @@
 
 
         /* ══════════════════════════════════════════
+           SKELETON LOADING CARDS
+           ══════════════════════════════════════════ */
+        function renderSkeletonCard() {
+            return `
+            <div class="skeleton-card">
+                <div class="skeleton-card__header">
+                    <div class="skeleton-card__avatar skeleton-shimmer"></div>
+                    <div class="skeleton-card__lines">
+                        <div class="skeleton-card__line skeleton-card__line--short skeleton-shimmer"></div>
+                        <div class="skeleton-card__line skeleton-card__line--xs skeleton-shimmer"></div>
+                    </div>
+                </div>
+                <div class="skeleton-card__body">
+                    <div class="skeleton-card__line skeleton-shimmer" style="width:100%"></div>
+                    <div class="skeleton-card__line skeleton-shimmer" style="width:95%"></div>
+                    <div class="skeleton-card__line skeleton-shimmer" style="width:70%"></div>
+                </div>
+                <div class="skeleton-card__footer">
+                    <div class="skeleton-card__btn skeleton-shimmer"></div>
+                    <div class="skeleton-card__btn skeleton-shimmer"></div>
+                    <div class="skeleton-card__btn skeleton-shimmer"></div>
+                </div>
+            </div>
+            `;
+        }
+
+        function showSkeletons() {
+            feedPosts.innerHTML = renderSkeletonCard() + renderSkeletonCard() + renderSkeletonCard();
+        }
+
+
+        /* ══════════════════════════════════════════
+           EMPTY STATE
+           ══════════════════════════════════════════ */
+        function renderEmptyState(icon, title, subtitle, actionLabel, actionUrl) {
+            return `
+            <div class="feed-empty">
+                <div class="feed-empty__icon">${icon}</div>
+                <div class="feed-empty__title">${title}</div>
+                <div class="feed-empty__text">${subtitle}</div>
+                ${actionLabel ? `<a href="${actionUrl || '#'}" class="btn-primary" style="margin-top: 8px;">${actionLabel}</a>` : ''}
+            </div>
+            `;
+        }
+
+
+        /* ══════════════════════════════════════════
            FEED LOADING
            ══════════════════════════════════════════ */
         async function loadFeed(page = 1) {
@@ -1280,28 +1710,46 @@
             feedLoading = true;
 
             if (page === 1) {
-                feedLoadingEl.style.display = 'flex';
+                showSkeletons();
             } else {
                 loadMoreBtn.textContent = 'Loading...';
                 loadMoreBtn.disabled = true;
             }
 
             try {
-                const data = await window.api.get(`/posts/?page=${page}`);
+                let data;
+                if (currentSort === 'recent') {
+                    // Personalized feed from followed users
+                    data = await window.api.get(`/feed/?page=${page}&limit=10`);
+                } else {
+                    // Trending / Top posts
+                    data = await window.api.get(`/explore/?page=${page}&limit=10`);
+                }
+
                 const posts = data.results || [];
 
                 if (page === 1) {
-                    feedLoadingEl.style.display = 'none';
                     if (posts.length === 0) {
-                        feedPosts.innerHTML = `
-                            <div class="feed-empty">
-                                <div class="feed-empty__icon">📝</div>
-                                <div class="feed-empty__title">No posts yet</div>
-                                <div class="feed-empty__text">Be the first to share something with the community!</div>
-                            </div>
-                        `;
+                        if (currentSort === 'recent' && data.meta && data.meta.empty) {
+                            // Show empty feed with suggestions
+                            feedPosts.innerHTML = renderEmptyState(
+                                '📡',
+                                'Your feed is empty',
+                                'Follow people to see their posts here.'
+                            );
+                            // Load suggested users below
+                            loadEmptyFeedSuggestions();
+                        } else {
+                            feedPosts.innerHTML = renderEmptyState(
+                                '📝',
+                                'No posts yet',
+                                'Be the first to share something with the community!'
+                            );
+                        }
+                        loadMoreWrap.style.display = 'none';
                         return;
                     }
+                    feedPosts.innerHTML = '';
                 }
 
                 let html = '';
@@ -1329,7 +1777,7 @@
 
             } catch (err) {
                 if (page === 1) {
-                    feedLoadingEl.innerHTML = `
+                    feedPosts.innerHTML = `
                         <div style="text-align:center; padding: 32px; color: var(--color-text-secondary);">
                             <p>Failed to load feed. <button class="btn-text-link" onclick="location.reload()">Retry</button></p>
                         </div>
@@ -1350,6 +1798,44 @@
                 loadFeed(feedPage + 1);
             }
         });
+
+
+        /* ══════════════════════════════════════════
+           EMPTY FEED SUGGESTIONS
+           ══════════════════════════════════════════ */
+        async function loadEmptyFeedSuggestions() {
+            try {
+                const data = await window.api.get('/users/suggested/');
+                const users = (data.results || data || []).slice(0, 3);
+                if (users.length === 0) return;
+
+                const suggestionsHtml = users.map(u => {
+                    const avatarSrc = u.avatar || window.app.getInitialsAvatar(u.username, 44);
+                    const displayName = `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username;
+                    return `
+                    <div class="feed-empty__suggestion-card">
+                        <a href="profile.html?username=${u.username}">
+                            <img class="feed-empty__suggestion-avatar" src="${avatarSrc}" alt="${window.app.escapeHtml(displayName)}">
+                        </a>
+                        <div class="feed-empty__suggestion-info">
+                            <a href="profile.html?username=${u.username}" class="feed-empty__suggestion-name">${window.app.escapeHtml(displayName)}</a>
+                            <div class="feed-empty__suggestion-headline">${window.app.escapeHtml(u.headline || 'Conectio member')}</div>
+                        </div>
+                        <button class="btn-secondary btn-secondary--sm" onclick="followSuggested(this, '${u.username}')">Follow</button>
+                    </div>
+                    `;
+                }).join('');
+
+                feedPosts.insertAdjacentHTML('beforeend', `
+                    <div class="feed-empty__suggestions" style="margin-top: 16px;">
+                        <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px;">People to follow</div>
+                        ${suggestionsHtml}
+                    </div>
+                `);
+            } catch (e) {
+                // Silently fail
+            }
+        }
 
 
         /* ══════════════════════════════════════════
@@ -1404,7 +1890,10 @@
                         <div class="post-card__time">${timeAgo}</div>
                     </div>
                     ${isOwn ? `
-                    <button class="post-card__menu-btn" data-action="menu" data-post-id="${post.id}" title="More options">⋯</button>
+                    <div class="post-card__menu-wrap">
+                        <button class="post-card__menu-btn" data-action="menu" data-post-id="${post.id}" title="More options">⋯</button>
+                        <div id="post-dropdown-${post.id}"></div>
+                    </div>
                     ` : ''}
                 </div>
 
@@ -1429,9 +1918,10 @@
 
                 <div class="post-card__actions">
                     <button class="post-card__action-btn ${isLiked ? 'post-card__action-btn--active' : ''}"
-                            data-action="like" data-post-id="${post.id}" id="like-btn-${post.id}">
-                        <span class="post-card__action-icon">${isLiked ? '👍' : '👍'}</span>
-                        <span>${isLiked ? 'Liked' : 'Like'}</span>
+                            data-action="like" data-post-id="${post.id}" id="like-btn-${post.id}"
+                            data-liked="${isLiked}">
+                        <span class="post-card__action-icon">👍</span>
+                        <span class="like-label">${isLiked ? 'Liked' : 'Like'}</span>
                     </button>
                     <button class="post-card__action-btn" data-action="comment" data-post-id="${post.id}">
                         <span class="post-card__action-icon">💬</span>
@@ -1470,7 +1960,9 @@
                     case 'share': handleShare(id); break;
                     case 'see-more': handleSeeMore(id); break;
                     case 'menu': handlePostMenu(id); break;
-                    case 'delete-post': confirmDeletePost(id); break;
+                    case 'delete-post': showDeleteConfirm(id); break;
+                    case 'save-post': handleSavePost(id); break;
+                    case 'copy-link': handleCopyLink(id); break;
                     case 'cancel-delete': cancelDeletePost(id); break;
                     case 'confirm-delete': deletePost(id); break;
                 }
@@ -1480,36 +1972,65 @@
 
         /* ── Like ─────────────────────────────────── */
         async function handleLike(postId) {
+            // Check login
+            if (!window.auth.isLoggedIn()) {
+                window.app.showToast('Sign in to like posts', 'info');
+                return;
+            }
+
             const btn = document.getElementById(`like-btn-${postId}`);
-            if (!btn) return;
+            if (!btn || btn.dataset.likeLoading === 'true') return;
+
+            const wasLiked = btn.dataset.liked === 'true';
+            const newLiked = !wasLiked;
+
+            // Optimistic update
+            btn.dataset.liked = String(newLiked);
+            btn.dataset.likeLoading = 'true';
+            btn.className = `post-card__action-btn ${newLiked ? 'post-card__action-btn--active' : ''}`;
+            const labelEl = btn.querySelector('.like-label');
+            if (labelEl) labelEl.textContent = newLiked ? 'Liked' : 'Like';
+
+            // Animation
+            if (newLiked) {
+                btn.classList.add('like-blip');
+                btn.addEventListener('animationend', () => btn.classList.remove('like-blip'), { once: true });
+            }
+
+            // Optimistic count
+            const countEl = document.getElementById(`likes-count-${postId}`);
+            const oldCount = parseInt(countEl?.textContent || 0);
+            const optimisticCount = newLiked ? oldCount + 1 : Math.max(0, oldCount - 1);
+            updateLikesDisplay(postId, optimisticCount);
 
             try {
                 const result = await window.api.post(`/posts/${postId}/like/`);
-                const isLiked = result.status === 'liked';
-                const count = result.likes_count;
-
-                // Update button
-                btn.className = `post-card__action-btn ${isLiked ? 'post-card__action-btn--active' : ''}`;
-                btn.innerHTML = `
-                    <span class="post-card__action-icon">👍</span>
-                    <span>${isLiked ? 'Liked' : 'Like'}</span>
-                `;
-
-                // Update count
-                const countEl = document.getElementById(`likes-count-${postId}`);
-                if (countEl) countEl.textContent = count;
-
-                // Update stats display
-                const statsLikes = btn.closest('.post-card').querySelector('.post-card__stats-likes');
-                if (statsLikes) {
-                    if (count > 0) {
-                        statsLikes.innerHTML = `<span style="font-size: 14px;">👍</span> <span id="likes-count-${postId}">${count}</span>`;
-                    } else {
-                        statsLikes.innerHTML = `<span id="likes-count-${postId}">0</span>`;
-                    }
-                }
+                // Use server truth
+                btn.dataset.liked = String(result.liked);
+                btn.className = `post-card__action-btn ${result.liked ? 'post-card__action-btn--active' : ''}`;
+                if (labelEl) labelEl.textContent = result.liked ? 'Liked' : 'Like';
+                updateLikesDisplay(postId, result.likes_count);
             } catch (err) {
-                window.app.showToast('Failed to like post.', 'error');
+                // Revert optimistic update
+                btn.dataset.liked = String(wasLiked);
+                btn.className = `post-card__action-btn ${wasLiked ? 'post-card__action-btn--active' : ''}`;
+                if (labelEl) labelEl.textContent = wasLiked ? 'Liked' : 'Like';
+                updateLikesDisplay(postId, oldCount);
+                const msg = err.data?.error || 'Failed to like post.';
+                window.app.showToast(msg, 'error');
+            } finally {
+                btn.dataset.likeLoading = 'false';
+            }
+        }
+
+        function updateLikesDisplay(postId, count) {
+            const statsLikes = document.querySelector(`#post-card-${postId} .post-card__stats-likes`);
+            if (statsLikes) {
+                if (count > 0) {
+                    statsLikes.innerHTML = `<span style="font-size: 14px;">👍</span> <span id="likes-count-${postId}">${count}</span>`;
+                } else {
+                    statsLikes.innerHTML = `<span id="likes-count-${postId}">0</span>`;
+                }
             }
         }
 
@@ -1540,45 +2061,107 @@
         }
 
 
-        /* ── Post Menu (Delete) ───────────────────── */
+        /* ── Post Menu (Dropdown) ──────────────────── */
         function handlePostMenu(postId) {
-            const card = document.getElementById(`post-card-${postId}`);
-            if (!card) return;
+            const container = document.getElementById(`post-dropdown-${postId}`);
+            if (!container) return;
 
-            // Toggle delete confirmation
-            const existing = card.querySelector('.post-card__delete-confirm');
-            if (existing) {
-                existing.remove();
+            // Toggle — if already open, close it
+            if (container.innerHTML.trim()) {
+                closeAllDropdowns();
                 return;
             }
 
-            const actionsBar = card.querySelector('.post-card__actions');
-            if (!actionsBar) return;
+            // Close any other open dropdowns first
+            closeAllDropdowns();
 
-            const confirmHtml = `
-                <div class="post-card__delete-confirm">
-                    <span>Delete this post?</span>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn-secondary btn-secondary--sm" data-action="cancel-delete" data-post-id="${postId}" style="padding: 4px 12px; font-size: 13px;">Cancel</button>
-                        <button class="btn-primary btn-primary--sm" data-action="confirm-delete" data-post-id="${postId}" style="padding: 4px 12px; font-size: 13px; background: var(--color-error);">Delete</button>
+            container.innerHTML = `
+                <div class="post-card__dropdown" id="post-dropdown-menu-${postId}">
+                    <button class="post-card__dropdown-item" data-action="save-post" data-post-id="${postId}">
+                        <span class="post-card__dropdown-icon">🔖</span>
+                        Save post
+                    </button>
+                    <button class="post-card__dropdown-item" data-action="copy-link" data-post-id="${postId}">
+                        <span class="post-card__dropdown-icon">🔗</span>
+                        Copy link
+                    </button>
+                    <div class="post-card__dropdown-divider"></div>
+                    <button class="post-card__dropdown-item post-card__dropdown-item--danger" data-action="delete-post" data-post-id="${postId}">
+                        <span class="post-card__dropdown-icon">🗑️</span>
+                        Delete post
+                    </button>
+                </div>
+            `;
+
+            // Close dropdown when clicking outside
+            setTimeout(() => {
+                document.addEventListener('click', handleOutsideDropdownClick);
+            }, 0);
+        }
+
+        function handleOutsideDropdownClick(e) {
+            if (!e.target.closest('.post-card__menu-wrap')) {
+                closeAllDropdowns();
+            }
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('[id^="post-dropdown-"]').forEach(el => {
+                if (!el.id.includes('menu')) el.innerHTML = '';
+            });
+            document.removeEventListener('click', handleOutsideDropdownClick);
+        }
+
+        function showDeleteConfirm(postId) {
+            // Remove outside click listener first to prevent race condition
+            document.removeEventListener('click', handleOutsideDropdownClick);
+
+            const container = document.getElementById(`post-dropdown-${postId}`);
+            if (!container) return;
+
+            container.innerHTML = `
+                <div class="post-card__dropdown">
+                    <div class="post-card__dropdown-confirm">
+                        <p>Are you sure you want to delete this post? This can't be undone.</p>
+                        <div class="post-card__dropdown-confirm-actions">
+                            <button class="btn-secondary btn-secondary--sm" data-action="cancel-delete" data-post-id="${postId}" style="padding:5px 14px;font-size:13px;">Cancel</button>
+                            <button class="btn-primary btn-primary--sm" data-action="confirm-delete" data-post-id="${postId}" style="padding:5px 14px;font-size:13px;background:var(--color-error);">Delete</button>
+                        </div>
                     </div>
                 </div>
             `;
-            actionsBar.insertAdjacentHTML('afterend', confirmHtml);
+
+            // Re-add outside click listener
+            setTimeout(() => {
+                document.addEventListener('click', handleOutsideDropdownClick);
+            }, 0);
         }
 
         function cancelDeletePost(postId) {
-            const card = document.getElementById(`post-card-${postId}`);
-            if (!card) return;
-            const confirm = card.querySelector('.post-card__delete-confirm');
-            if (confirm) confirm.remove();
+            const container = document.getElementById(`post-dropdown-${postId}`);
+            if (container) container.innerHTML = '';
+            document.removeEventListener('click', handleOutsideDropdownClick);
         }
 
-        function confirmDeletePost(postId) {
-            // This is handled by the confirm-delete action
+        function handleSavePost(postId) {
+            closeAllDropdowns();
+            window.app.showToast('Post saved! (Coming soon)', 'info');
+        }
+
+        function handleCopyLink(postId) {
+            closeAllDropdowns();
+            const url = `${window.location.origin}/index.html?post=${postId}`;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url)
+                    .then(() => window.app.showToast('Link copied to clipboard!', 'info'))
+                    .catch(() => window.app.showToast('Link: ' + url, 'info'));
+            } else {
+                window.app.showToast('Link: ' + url, 'info');
+            }
         }
 
         async function deletePost(postId) {
+            closeAllDropdowns();
             try {
                 await window.api.delete(`/posts/${postId}/`);
                 const card = document.getElementById(`post-card-${postId}`);
@@ -1801,7 +2384,9 @@
                             <button class="btn-secondary btn-secondary--sm suggested-user__btn" onclick="followSuggested(this, '${u.username}')">Follow</button>
                         </div>
                     `;
-                }).join('');
+                }).join('') + `
+                    <a href="explore.html" style="display:block;text-align:center;padding:12px 0 4px;font-size:13px;font-weight:600;color:var(--color-text-link);border-top:1px solid var(--color-border);margin-top:8px;">Show more →</a>
+                `;
 
             } catch (err) {
                 container.innerHTML = `
@@ -1814,17 +2399,26 @@
 
         // Follow from suggested users sidebar
         window.followSuggested = async function(btn, username) {
+            if (btn.disabled) return;
+            btn.disabled = true;
+
             try {
                 const result = await window.api.post(`/users/follow/${username}/`);
-                if (result.status === 'followed') {
+                if (result.is_following) {
                     btn.textContent = 'Following';
-                    btn.classList.remove('btn-secondary');
-                    btn.classList.add('btn-primary');
-                    btn.classList.add('btn-primary--sm');
-                    btn.disabled = true;
+                    btn.classList.remove('btn-secondary', 'btn-secondary--sm');
+                    btn.classList.add('btn-primary', 'btn-primary--sm');
+                    btn.dataset.following = 'true';
+                } else {
+                    btn.textContent = 'Follow';
+                    btn.classList.remove('btn-primary', 'btn-primary--sm');
+                    btn.classList.add('btn-secondary', 'btn-secondary--sm');
+                    btn.dataset.following = 'false';
                 }
             } catch (err) {
                 window.app.showToast('Failed to follow.', 'error');
+            } finally {
+                btn.disabled = false;
             }
         };
 

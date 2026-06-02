@@ -2,8 +2,11 @@ from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
+from django.db.models import F, Q
 from .models import Post, Like, Comment
 from .serializers import PostSerializer, PostCreateSerializer, CommentSerializer
+from users.models import Connection
+from users.serializers import UserPublicSerializer
 
 User = get_user_model()
 
@@ -80,18 +83,28 @@ class LikeView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        # Prevent liking own post
+        if post.author == request.user:
+            return Response(
+                {'error': 'You cannot like your own post.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        if not created:
-            like.delete()
-            post.likes_count = max(0, post.likes_count - 1)
+        existing = Like.objects.filter(user=request.user, post=post).first()
+
+        if existing:
+            existing.delete()
+            post.likes_count = F('likes_count') - 1
             post.save(update_fields=['likes_count'])
-            return Response({'status': 'unliked', 'likes_count': post.likes_count})
+            post.refresh_from_db()
+            return Response({'liked': False, 'likes_count': post.likes_count})
 
-        post.likes_count = post.likes_count + 1
+        Like.objects.create(user=request.user, post=post)
+        post.likes_count = F('likes_count') + 1
         post.save(update_fields=['likes_count'])
+        post.refresh_from_db()
         return Response(
-            {'status': 'liked', 'likes_count': post.likes_count},
+            {'liked': True, 'likes_count': post.likes_count},
             status=status.HTTP_201_CREATED,
         )
 
@@ -160,3 +173,125 @@ class UserPostsView(generics.ListAPIView):
         return Post.objects.filter(
             author__username=self.kwargs['username']
         ).select_related('author')
+
+
+class FeedView(APIView):
+    """GET /api/feed/ — Personalized feed from followed users."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        page = int(request.query_params.get('page', 1))
+        limit = int(request.query_params.get('limit', 10))
+        offset = (page - 1) * limit
+
+        following_ids = Connection.objects.filter(
+            follower=request.user
+        ).values_list('following_id', flat=True)
+
+        if not following_ids:
+            return Response({
+                'results': [],
+                'count': 0,
+                'next': None,
+                'previous': None,
+                'meta': {
+                    'empty': True,
+                    'message': 'Follow people to see their posts here.',
+                },
+            })
+
+        queryset = Post.objects.filter(
+            author_id__in=following_ids
+        ).select_related('author').prefetch_related('likes').order_by('-created_at')
+
+        total = queryset.count()
+        posts = queryset[offset:offset + limit]
+
+        serializer = PostSerializer(
+            posts, many=True, context={'request': request}
+        )
+
+        has_next = (offset + limit) < total
+        has_prev = page > 1
+
+        return Response({
+            'results': serializer.data,
+            'count': total,
+            'next': f'?page={page + 1}&limit={limit}' if has_next else None,
+            'previous': f'?page={page - 1}&limit={limit}' if has_prev else None,
+        })
+
+
+class SearchView(APIView):
+    """GET /api/search/ — Search users and posts."""
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        q = request.query_params.get('q', '').strip()
+        search_type = request.query_params.get('type', 'all')
+
+        if not q:
+            return Response({
+                'users': [],
+                'posts': [],
+                'query': '',
+            })
+
+        users_data = []
+        posts_data = []
+
+        if search_type in ('all', 'users'):
+            users = User.objects.filter(
+                Q(username__icontains=q) |
+                Q(first_name__icontains=q) |
+                Q(bio__icontains=q)
+            )[:10]
+            users_data = UserPublicSerializer(
+                users, many=True, context={'request': request}
+            ).data
+
+        if search_type in ('all', 'posts'):
+            posts = Post.objects.filter(
+                content__icontains=q
+            ).select_related('author')[:20]
+            posts_data = PostSerializer(
+                posts, many=True, context={'request': request}
+            ).data
+
+        return Response({
+            'users': users_data,
+            'posts': posts_data,
+            'query': q,
+        })
+
+
+class ExploreView(APIView):
+    """GET /api/explore/ — Trending posts sorted by engagement."""
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        page = int(request.query_params.get('page', 1))
+        limit = int(request.query_params.get('limit', 12))
+        offset = (page - 1) * limit
+
+        queryset = Post.objects.select_related('author').annotate(
+            engagement=F('likes_count') + F('comments_count')
+        ).order_by('-engagement', '-created_at')
+
+        total = queryset.count()
+        posts = queryset[offset:offset + limit]
+
+        serializer = PostSerializer(
+            posts, many=True, context={'request': request}
+        )
+
+        has_next = (offset + limit) < total
+        has_prev = page > 1
+
+        return Response({
+            'results': serializer.data,
+            'count': total,
+            'next': f'?page={page + 1}&limit={limit}' if has_next else None,
+            'previous': f'?page={page - 1}&limit={limit}' if has_prev else None,
+        })
+

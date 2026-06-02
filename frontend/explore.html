@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Explore the Conectio community — discover people and content.">
+    <meta name="description" content="Explore Conectio — Discover trending posts, search for people and content.">
     <title>Explore — Conectio</title>
 
     <link rel="stylesheet" href="assets/css/main.css">
@@ -11,134 +11,635 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230A66C2'/><text x='16' y='23' font-family='Arial' font-size='20' font-weight='bold' fill='white' text-anchor='middle'>C</text></svg>">
 
     <style>
+        /* ═══════════════════════════════════════════════
+           EXPLORE PAGE LAYOUT
+           ═══════════════════════════════════════════════ */
+        .explore-container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: var(--space-lg) var(--space-base);
+        }
+
         .explore-header {
             text-align: center;
-            padding: var(--space-2xl) var(--space-base);
-            max-width: 600px;
-            margin: 0 auto;
+            padding: var(--space-xl) 0 var(--space-lg);
         }
+
         .explore-header__title {
             font-size: var(--font-size-2xl);
             font-weight: 700;
-            margin-bottom: var(--space-sm);
+            margin-bottom: var(--space-xs);
+            background: linear-gradient(135deg, #0A66C2, #0284C7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
+
         .explore-header__subtitle {
             color: var(--color-text-secondary);
             font-size: var(--font-size-md);
-            margin-bottom: var(--space-lg);
         }
-        .explore-search {
+
+
+        /* ── Search Bar ───────────────────────────── */
+        .explore-search-wrap {
+            max-width: 640px;
+            margin: var(--space-lg) auto;
             position: relative;
-            max-width: 480px;
-            margin: 0 auto;
         }
+
+        .explore-search-bar {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
         .explore-search__icon {
             position: absolute;
-            left: 14px;
+            left: 18px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 18px;
+            font-size: 20px;
             color: var(--color-text-secondary);
             pointer-events: none;
+            z-index: 1;
         }
+
         .explore-search__input {
             width: 100%;
-            height: 44px;
-            border: 1px solid var(--color-border-input);
-            border-radius: var(--radius-sm);
-            padding: 0 16px 0 42px;
-            font-size: var(--font-size-base);
+            height: 48px;
+            border: 2px solid var(--color-border);
+            border-radius: 24px;
+            padding: 0 48px 0 50px;
+            font-size: 16px;
             background: var(--color-bg-card);
+            color: var(--color-text-primary);
             transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
         }
+
         .explore-search__input:focus {
             outline: none;
             border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px var(--color-primary-light);
+            box-shadow: 0 0 0 4px var(--color-primary-light);
         }
 
-        .explore-grid {
-            max-width: var(--max-width);
-            margin: 0 auto;
-            padding: 0 var(--space-base) var(--space-2xl);
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: var(--space-base);
+        .explore-search__input::placeholder {
+            color: #999;
         }
 
-        .explore-card {
-            text-align: center;
-            padding: var(--space-lg);
-            transition: box-shadow var(--transition-fast), transform var(--transition-fast);
-        }
-        .explore-card:hover {
-            box-shadow: var(--shadow-elevated);
-            transform: translateY(-2px);
-        }
-        .explore-card__icon {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto var(--space-md);
+        .explore-search__clear {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 28px;
+            height: 28px;
             border-radius: var(--radius-full);
-            background: var(--color-primary-light);
-            display: flex;
+            background: var(--color-bg-hover);
+            border: none;
+            cursor: pointer;
+            display: none;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
-        }
-        .explore-card__title {
-            font-size: var(--font-size-md);
-            font-weight: 600;
-            margin-bottom: var(--space-xs);
-        }
-        .explore-card__desc {
+            font-size: 14px;
             color: var(--color-text-secondary);
-            font-size: var(--font-size-sm);
-            line-height: 1.5;
+            transition: background var(--transition-fast), color var(--transition-fast);
         }
 
-        .explore-section {
-            max-width: var(--max-width);
-            margin: var(--space-lg) auto 0;
-            padding: 0 var(--space-base);
+        .explore-search__clear:hover {
+            background: var(--color-border);
+            color: var(--color-text-primary);
         }
-        .explore-section__title {
+
+        .explore-search__clear--visible {
+            display: flex;
+        }
+
+        .explore-search__status {
+            text-align: center;
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            margin-top: var(--space-sm);
+            min-height: 20px;
+        }
+
+
+        /* ── Recent Searches ──────────────────────── */
+        .recent-searches {
+            display: none;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+            margin-top: var(--space-md);
+            justify-content: center;
+        }
+
+        .recent-searches--visible {
+            display: flex;
+        }
+
+        .recent-searches__label {
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-xs);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .recent-search-chip {
+            padding: 5px 14px;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--color-border);
+            background: var(--color-bg-card);
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .recent-search-chip:hover {
+            background: var(--color-primary-light);
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+
+        /* ── Filter Chips ─────────────────────────── */
+        .filter-chips {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-sm);
+            margin-top: var(--space-md);
+        }
+
+        .filter-chip {
+            padding: 6px 20px;
+            border-radius: var(--radius-pill);
+            border: 1.5px solid var(--color-border);
+            background: var(--color-bg-card);
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .filter-chip:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .filter-chip--active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #fff;
+        }
+
+        .filter-chip--active:hover {
+            background: var(--color-primary-hover);
+            border-color: var(--color-primary-hover);
+            color: #fff;
+        }
+
+
+        /* ── Search Results ───────────────────────── */
+        .search-results {
+            margin-top: var(--space-lg);
+        }
+
+        .search-results__section {
+            margin-bottom: var(--space-xl);
+        }
+
+        .search-results__heading {
             font-size: var(--font-size-lg);
             font-weight: 600;
-            margin-bottom: var(--space-base);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
         }
 
-        .feed-post {
-            padding: var(--space-lg);
-            margin-bottom: var(--space-base);
+        .search-results__count {
+            font-size: var(--font-size-sm);
+            font-weight: 400;
+            color: var(--color-text-secondary);
         }
-        .feed-post__header {
+
+
+        /* ── User Cards Grid ──────────────────────── */
+        .user-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--space-md);
+        }
+
+        .user-result-card {
             display: flex;
             align-items: center;
             gap: var(--space-md);
-            margin-bottom: var(--space-md);
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-base);
+            transition: box-shadow var(--transition-fast), transform var(--transition-fast);
         }
-        .feed-post__author-name {
+
+        .user-result-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .user-result-card__avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-full);
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .user-result-card__info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-result-card__name {
             font-weight: 600;
             font-size: var(--font-size-base);
+            color: var(--color-text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .feed-post__author-headline {
+
+        .user-result-card__name:hover {
+            color: var(--color-primary);
+        }
+
+        .user-result-card__headline {
+            font-size: 12px;
             color: var(--color-text-secondary);
-            font-size: var(--font-size-sm);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
         }
-        .feed-post__time {
+
+        .user-result-card__meta {
+            font-size: 11px;
             color: var(--color-text-secondary);
-            font-size: var(--font-size-xs);
+            margin-top: 4px;
         }
-        .feed-post__content {
-            line-height: 1.6;
+
+        .user-result-card__btn {
+            flex-shrink: 0;
+        }
+
+
+        /* ── People Horizontal Scroll (for type=all) ─ */
+        .people-scroll-row {
+            display: flex;
+            gap: var(--space-md);
+            overflow-x: auto;
+            padding-bottom: var(--space-sm);
+            scrollbar-width: thin;
+        }
+
+        .people-scroll-row::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .people-scroll-row::-webkit-scrollbar-thumb {
+            background: var(--color-border);
+            border-radius: 4px;
+        }
+
+        .people-scroll-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-width: 150px;
+            max-width: 150px;
+            padding: var(--space-base);
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            flex-shrink: 0;
+            transition: box-shadow var(--transition-fast);
+        }
+
+        .people-scroll-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .people-scroll-card__avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-full);
+            object-fit: cover;
+            margin-bottom: var(--space-sm);
+        }
+
+        .people-scroll-card__name {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        .people-scroll-card__headline {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-sm);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+
+        /* ── Post Card (reused from index) ─────────── */
+        .post-card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-sm);
+            overflow: hidden;
+            transition: box-shadow var(--transition-fast);
+        }
+
+        .post-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .post-card__header {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-md);
+            padding: 12px 16px;
+        }
+
+        .post-card__avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-full);
+            object-fit: cover;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .post-card__author-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .post-card__author-name {
+            font-weight: 600;
+            font-size: var(--font-size-base);
+            color: var(--color-text-primary);
+            cursor: pointer;
+            line-height: 1.3;
+        }
+
+        .post-card__author-name:hover {
+            color: var(--color-primary);
+            text-decoration: underline;
+        }
+
+        .post-card__author-headline {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.4;
+        }
+
+        .post-card__time {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+
+        .post-card__content {
+            padding: 0 16px 12px;
+            font-size: var(--font-size-base);
+            line-height: 1.5;
+            color: var(--color-text-primary);
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .post-card__image {
+            width: 100%;
+            max-height: 512px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .post-card__stats {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            border-top: 1px solid var(--color-border);
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+
+        .post-card__stats-likes {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .post-card__actions {
+            display: flex;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .post-card__action-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 0;
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 0;
+            transition: background var(--transition-fast), color var(--transition-fast);
+        }
+
+        .post-card__action-btn:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-text-primary);
+        }
+
+        .post-card__action-btn--active {
+            color: var(--color-primary);
+        }
+
+        .post-card__action-icon {
+            font-size: 18px;
+        }
+
+        @keyframes likeBlip {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .like-blip .post-card__action-icon {
+            display: inline-block;
+            animation: likeBlip 300ms ease;
+        }
+
+
+        /* ── Trending Section ─────────────────────── */
+        .trending-section {
+            margin-top: var(--space-xl);
+        }
+
+        .trending-section__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: var(--space-md);
         }
-        .feed-post__actions {
+
+        .trending-section__title {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
             display: flex;
-            gap: var(--space-xs);
-            padding-top: var(--space-md);
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .trending-section__title-icon {
+            font-size: 24px;
+        }
+
+
+        /* ── Empty State ──────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: var(--space-2xl) var(--space-base);
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+        }
+
+        .empty-state__icon {
+            font-size: 48px;
+            color: var(--color-primary);
+            margin-bottom: var(--space-md);
+        }
+
+        .empty-state__title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-bottom: var(--space-sm);
+        }
+
+        .empty-state__text {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+        }
+
+
+        /* ── Skeleton Loading ─────────────────────── */
+        .skeleton-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.5s infinite;
+        }
+
+        @keyframes skeleton-shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-post {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-sm);
+            padding: 16px;
+        }
+
+        .skeleton-post__header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .skeleton-post__avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+        }
+
+        .skeleton-post__lines {
+            flex: 1;
+        }
+
+        .skeleton-post__line {
+            height: 12px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .skeleton-post__body .skeleton-post__line {
+            height: 10px;
+        }
+
+        .skeleton-post__footer {
+            display: flex;
+            gap: 16px;
+            padding-top: 12px;
             border-top: 1px solid var(--color-border);
+        }
+
+        .skeleton-post__btn {
+            height: 32px;
+            flex: 1;
+            border-radius: 4px;
+        }
+
+
+        /* ── Load More ────────────────────────────── */
+        .load-more-wrap {
+            text-align: center;
+            padding: var(--space-lg);
+        }
+
+
+        /* ── Responsive ───────────────────────────── */
+        @media (max-width: 768px) {
+            .explore-header__title {
+                font-size: var(--font-size-xl);
+            }
+
+            .user-cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .post-card__action-btn span:not(.post-card__action-icon) {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -161,63 +662,61 @@
 
     <!-- ═══════════════ EXPLORE ═══════════════ -->
     <main>
-        <div class="explore-header" id="explore-header">
-            <h1 class="explore-header__title">Explore Conectio</h1>
-            <p class="explore-header__subtitle">Discover people, ideas, and opportunities across the community.</p>
-            <div class="explore-search">
-                <span class="explore-search__icon">🔍</span>
-                <input
-                    type="search"
-                    class="explore-search__input"
-                    placeholder="Search people, posts, topics..."
-                    id="explore-search-input"
-                >
-            </div>
-        </div>
+        <div class="explore-container">
 
-        <!-- Feature cards -->
-        <div class="explore-grid" id="explore-features">
-            <div class="card-shadow explore-card">
-                <div class="explore-card__icon">👥</div>
-                <h3 class="explore-card__title">People</h3>
-                <p class="explore-card__desc">Find professionals in your field and grow your network.</p>
+            <!-- Header -->
+            <div class="explore-header">
+                <h1 class="explore-header__title" id="explore-title">Explore</h1>
+                <p class="explore-header__subtitle">Discover what's happening on Conectio</p>
             </div>
-            <div class="card-shadow explore-card">
-                <div class="explore-card__icon">📰</div>
-                <h3 class="explore-card__title">Posts</h3>
-                <p class="explore-card__desc">Browse the latest thoughts and updates from the community.</p>
-            </div>
-            <div class="card-shadow explore-card">
-                <div class="explore-card__icon">🏢</div>
-                <h3 class="explore-card__title">Companies</h3>
-                <p class="explore-card__desc">Explore organizations and discover new opportunities.</p>
-            </div>
-            <div class="card-shadow explore-card">
-                <div class="explore-card__icon">📚</div>
-                <h3 class="explore-card__title">Learning</h3>
-                <p class="explore-card__desc">Develop skills with curated content and courses.</p>
-            </div>
-            <div class="card-shadow explore-card">
-                <div class="explore-card__icon">📅</div>
-                <h3 class="explore-card__title">Events</h3>
-                <p class="explore-card__desc">Find and attend professional events and meetups.</p>
-            </div>
-            <div class="card-shadow explore-card">
-                <div class="explore-card__icon">📊</div>
-                <h3 class="explore-card__title">Trending</h3>
-                <p class="explore-card__desc">See what topics are being discussed right now.</p>
-            </div>
-        </div>
 
-        <!-- Recent feed -->
-        <div class="explore-section" id="explore-feed-section">
-            <h2 class="explore-section__title">Latest Posts</h2>
-            <div id="explore-feed">
-                <div class="card-shadow text-center" style="padding: 32px;">
-                    <p class="text-muted">Posts will appear here once the community starts sharing.</p>
-                    <a href="register.html" class="btn-primary" style="margin-top: 16px;">Be the first to post</a>
+            <!-- Search Bar -->
+            <div class="explore-search-wrap" id="explore-search-wrap">
+                <div class="explore-search-bar">
+                    <span class="explore-search__icon">🔍</span>
+                    <input
+                        type="search"
+                        class="explore-search__input"
+                        placeholder="Search people, posts, topics..."
+                        id="explore-search-input"
+                        autocomplete="off"
+                    >
+                    <button class="explore-search__clear" id="search-clear-btn" aria-label="Clear search">&times;</button>
+                </div>
+                <div class="explore-search__status" id="search-status"></div>
+
+                <!-- Recent Searches -->
+                <div class="recent-searches" id="recent-searches">
+                    <div class="recent-searches__label">Recent searches</div>
+                </div>
+
+                <!-- Filter Chips -->
+                <div class="filter-chips" id="filter-chips" style="display: none;">
+                    <button class="filter-chip filter-chip--active" data-type="all" id="filter-all">All</button>
+                    <button class="filter-chip" data-type="users" id="filter-people">People</button>
+                    <button class="filter-chip" data-type="posts" id="filter-posts">Posts</button>
                 </div>
             </div>
+
+            <!-- Search Results Container -->
+            <div class="search-results" id="search-results" style="display: none;"></div>
+
+            <!-- Trending Section (shown when no query) -->
+            <div class="trending-section" id="trending-section">
+                <div class="trending-section__header">
+                    <div class="trending-section__title">
+                        <span class="trending-section__title-icon">🔥</span>
+                        Trending on Conectio
+                    </div>
+                </div>
+                <div id="trending-posts">
+                    <!-- Skeleton loading -->
+                </div>
+                <div class="load-more-wrap" id="trending-load-more" style="display: none;">
+                    <button class="btn-secondary" id="trending-load-more-btn" style="padding: 10px 32px;">Load more</button>
+                </div>
+            </div>
+
         </div>
     </main>
 
@@ -234,43 +733,706 @@
     <script src="assets/js/main.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Try to load latest posts
-            try {
-                const data = await window.api.get('/posts/');
-                const feedEl = document.getElementById('explore-feed');
+    (function() {
+        'use strict';
 
-                if (data.results && data.results.length > 0) {
-                    feedEl.innerHTML = data.results.map(post => `
-                        <div class="card-shadow feed-post">
-                            <div class="feed-post__header">
-                                <div class="avatar avatar-md avatar-placeholder" style="width:48px;height:48px;font-size:18px;">
-                                    ${(post.author.first_name || post.author.username || '?').charAt(0).toUpperCase()}
-                                </div>
-                                <div>
-                                    <div class="feed-post__author-name">${escapeHtml(post.author.first_name || '')} ${escapeHtml(post.author.last_name || '')}</div>
-                                    <div class="feed-post__author-headline">${escapeHtml(post.author.headline || '')}</div>
-                                    <div class="feed-post__time">${window.app.timeAgo(post.created_at)}</div>
-                                </div>
-                            </div>
-                            <div class="feed-post__content">${escapeHtml(post.content)}</div>
-                            <div class="feed-post__actions">
-                                <button class="btn-ghost">❤️ ${post.likes_count}</button>
-                                <button class="btn-ghost">💬 ${post.comments_count}</button>
-                            </div>
-                        </div>
-                    `).join('');
+        /* ══════════════════════════════════════════
+           STATE
+           ══════════════════════════════════════════ */
+        let currentUser = null;
+        let currentQuery = '';
+        let currentType = 'all';
+        let trendingPage = 1;
+        let trendingHasMore = true;
+        let trendingLoading = false;
+        let searchDebounceTimer = null;
+
+        const RECENT_SEARCHES_KEY = 'conectio_recent_searches';
+        const MAX_RECENT = 5;
+
+
+        /* ══════════════════════════════════════════
+           DOM REFS
+           ══════════════════════════════════════════ */
+        const searchInput = document.getElementById('explore-search-input');
+        const clearBtn = document.getElementById('search-clear-btn');
+        const searchStatus = document.getElementById('search-status');
+        const filterChips = document.getElementById('filter-chips');
+        const searchResults = document.getElementById('search-results');
+        const trendingSection = document.getElementById('trending-section');
+        const trendingPosts = document.getElementById('trending-posts');
+        const trendingLoadMore = document.getElementById('trending-load-more');
+        const trendingLoadMoreBtn = document.getElementById('trending-load-more-btn');
+        const recentSearchesEl = document.getElementById('recent-searches');
+
+
+        /* ══════════════════════════════════════════
+           INIT
+           ══════════════════════════════════════════ */
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load current user
+            if (window.auth.isLoggedIn()) {
+                try {
+                    currentUser = await window.api.get('/users/me/');
+                } catch (e) {
+                    currentUser = window.auth.getCurrentUser();
                 }
-            } catch (e) {
-                // Feed loading failed — show placeholder (already shown)
+            }
+
+            setupSearch();
+            setupFilterChips();
+            loadTrending();
+
+            // Check if URL has a search query
+            const urlParams = new URLSearchParams(window.location.search);
+            const q = urlParams.get('q');
+            if (q) {
+                searchInput.value = q;
+                currentQuery = q;
+                performSearch(q, currentType);
+            }
+
+            // Focus search if coming from navbar
+            if (urlParams.has('focus')) {
+                searchInput.focus();
             }
         });
 
+
+        /* ══════════════════════════════════════════
+           DEBOUNCE
+           ══════════════════════════════════════════ */
+        function debounce(fn, delay) {
+            let timer;
+            return function(...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+
+        /* ══════════════════════════════════════════
+           SEARCH SETUP
+           ══════════════════════════════════════════ */
+        function setupSearch() {
+            const debouncedSearch = debounce((value) => {
+                const query = value.trim();
+                if (query.length === 0) {
+                    clearSearchResults();
+                    return;
+                }
+                currentQuery = query;
+                performSearch(query, currentType);
+            }, 350);
+
+            searchInput.addEventListener('input', (e) => {
+                const value = e.target.value;
+
+                // Show/hide clear button
+                if (value.length > 0) {
+                    clearBtn.classList.add('explore-search__clear--visible');
+                    searchStatus.textContent = 'Searching...';
+                    recentSearchesEl.classList.remove('recent-searches--visible');
+                } else {
+                    clearBtn.classList.remove('explore-search__clear--visible');
+                    searchStatus.textContent = '';
+                }
+
+                debouncedSearch(value);
+            });
+
+            // Clear button
+            clearBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                clearBtn.classList.remove('explore-search__clear--visible');
+                clearSearchResults();
+                searchInput.focus();
+            });
+
+            // Focus/blur — show recent searches
+            searchInput.addEventListener('focus', () => {
+                if (searchInput.value.trim() === '') {
+                    renderRecentSearches();
+                }
+            });
+
+            searchInput.addEventListener('blur', () => {
+                // Delay hide so clicks on chips can register
+                setTimeout(() => {
+                    recentSearchesEl.classList.remove('recent-searches--visible');
+                }, 200);
+            });
+
+            // Enter key
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    clearTimeout(searchDebounceTimer);
+                    const query = searchInput.value.trim();
+                    if (query) {
+                        currentQuery = query;
+                        performSearch(query, currentType);
+                    }
+                }
+            });
+        }
+
+
+        /* ══════════════════════════════════════════
+           FILTER CHIPS
+           ══════════════════════════════════════════ */
+        function setupFilterChips() {
+            const chips = document.querySelectorAll('.filter-chip');
+            chips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    const type = chip.dataset.type;
+                    if (type === currentType) return;
+
+                    currentType = type;
+                    chips.forEach(c => c.classList.remove('filter-chip--active'));
+                    chip.classList.add('filter-chip--active');
+
+                    if (currentQuery) {
+                        performSearch(currentQuery, currentType);
+                    }
+                });
+            });
+        }
+
+
+        /* ══════════════════════════════════════════
+           SEARCH API
+           ══════════════════════════════════════════ */
+        async function performSearch(query, type) {
+            searchStatus.textContent = 'Searching...';
+            filterChips.style.display = 'flex';
+            trendingSection.style.display = 'none';
+            searchResults.style.display = 'block';
+
+            try {
+                const data = await window.api.get(`/search/?q=${encodeURIComponent(query)}&type=${type}`);
+
+                // Save to recent searches
+                saveRecentSearch(query);
+
+                const users = data.users || [];
+                const posts = data.posts || [];
+
+                if (users.length === 0 && posts.length === 0) {
+                    searchResults.innerHTML = renderEmptyState(
+                        '🔎',
+                        `No results found for "${escapeHtml(query)}"`,
+                        'Try different keywords or check your spelling.'
+                    );
+                    searchStatus.textContent = 'No results';
+                    return;
+                }
+
+                let html = '';
+
+                if (type === 'all') {
+                    // Show people in horizontal scroll, then posts below
+                    if (users.length > 0) {
+                        html += `
+                        <div class="search-results__section">
+                            <div class="search-results__heading">
+                                👥 People
+                                <span class="search-results__count">(${users.length})</span>
+                            </div>
+                            <div class="people-scroll-row">
+                                ${users.map(u => renderPeopleScrollCard(u)).join('')}
+                            </div>
+                        </div>`;
+                    }
+
+                    if (posts.length > 0) {
+                        html += `
+                        <div class="search-results__section">
+                            <div class="search-results__heading">
+                                📰 Posts
+                                <span class="search-results__count">(${posts.length})</span>
+                            </div>
+                            <div>${posts.map(p => renderPostCard(p)).join('')}</div>
+                        </div>`;
+                    }
+                } else if (type === 'users') {
+                    html += `
+                    <div class="search-results__section">
+                        <div class="search-results__heading">
+                            👥 People
+                            <span class="search-results__count">(${users.length})</span>
+                        </div>
+                        <div class="user-cards-grid">
+                            ${users.map(u => renderUserCard(u)).join('')}
+                        </div>
+                    </div>`;
+                } else if (type === 'posts') {
+                    html += `
+                    <div class="search-results__section">
+                        <div class="search-results__heading">
+                            📰 Posts
+                            <span class="search-results__count">(${posts.length})</span>
+                        </div>
+                        <div>${posts.map(p => renderPostCard(p)).join('')}</div>
+                    </div>`;
+                }
+
+                searchResults.innerHTML = html;
+                searchStatus.textContent = `${users.length + posts.length} results for "${escapeHtml(query)}"`;
+
+                // Attach like events to post cards
+                const postCards = searchResults.querySelectorAll('[data-post-id]');
+                const seenIds = new Set();
+                postCards.forEach(card => {
+                    const postId = card.dataset.postId;
+                    if (postId && !seenIds.has(postId)) {
+                        seenIds.add(postId);
+                        attachPostCardEvents(parseInt(postId));
+                    }
+                });
+
+            } catch (err) {
+                searchResults.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state__icon">⚠️</div>
+                        <div class="empty-state__title">Search failed</div>
+                        <div class="empty-state__text">Please try again later.</div>
+                    </div>`;
+                searchStatus.textContent = '';
+            }
+        }
+
+
+        /* ══════════════════════════════════════════
+           CLEAR SEARCH
+           ══════════════════════════════════════════ */
+        function clearSearchResults() {
+            currentQuery = '';
+            searchResults.style.display = 'none';
+            searchResults.innerHTML = '';
+            filterChips.style.display = 'none';
+            trendingSection.style.display = 'block';
+            searchStatus.textContent = '';
+        }
+
+
+        /* ══════════════════════════════════════════
+           RECENT SEARCHES
+           ══════════════════════════════════════════ */
+        function getRecentSearches() {
+            try {
+                return JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY)) || [];
+            } catch {
+                return [];
+            }
+        }
+
+        function saveRecentSearch(query) {
+            let recent = getRecentSearches();
+            // Remove duplicate
+            recent = recent.filter(s => s.toLowerCase() !== query.toLowerCase());
+            // Add to front
+            recent.unshift(query);
+            // Trim to max
+            recent = recent.slice(0, MAX_RECENT);
+            localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(recent));
+        }
+
+        function renderRecentSearches() {
+            const recent = getRecentSearches();
+            if (recent.length === 0) {
+                recentSearchesEl.classList.remove('recent-searches--visible');
+                return;
+            }
+
+            const chipsHtml = recent.map(q =>
+                `<button class="recent-search-chip" data-query="${escapeHtml(q)}">${escapeHtml(q)}</button>`
+            ).join('');
+
+            recentSearchesEl.innerHTML = `
+                <div class="recent-searches__label">Recent searches</div>
+                ${chipsHtml}
+            `;
+
+            recentSearchesEl.classList.add('recent-searches--visible');
+
+            // Attach click events
+            recentSearchesEl.querySelectorAll('.recent-search-chip').forEach(chip => {
+                chip.addEventListener('mousedown', (e) => {
+                    e.preventDefault(); // Prevent blur
+                    const query = chip.dataset.query;
+                    searchInput.value = query;
+                    currentQuery = query;
+                    clearBtn.classList.add('explore-search__clear--visible');
+                    recentSearchesEl.classList.remove('recent-searches--visible');
+                    performSearch(query, currentType);
+                });
+            });
+        }
+
+
+        /* ══════════════════════════════════════════
+           TRENDING POSTS
+           ══════════════════════════════════════════ */
+        async function loadTrending(page = 1) {
+            if (trendingLoading) return;
+            trendingLoading = true;
+
+            if (page === 1) {
+                trendingPosts.innerHTML = renderSkeletonCards(4);
+            } else {
+                trendingLoadMoreBtn.textContent = 'Loading...';
+                trendingLoadMoreBtn.disabled = true;
+            }
+
+            try {
+                const data = await window.api.get(`/explore/?page=${page}&limit=12`);
+                const posts = data.results || [];
+
+                if (page === 1) {
+                    if (posts.length === 0) {
+                        trendingPosts.innerHTML = renderEmptyState(
+                            '📊',
+                            'Nothing trending yet',
+                            'Be the first to post and start a conversation!'
+                        );
+                        trendingLoadMore.style.display = 'none';
+                        return;
+                    }
+                    trendingPosts.innerHTML = '';
+                }
+
+                let html = '';
+                for (const post of posts) {
+                    html += renderPostCard(post);
+                }
+
+                if (page === 1) {
+                    trendingPosts.innerHTML = html;
+                } else {
+                    trendingPosts.insertAdjacentHTML('beforeend', html);
+                }
+
+                // Attach events
+                for (const post of posts) {
+                    attachPostCardEvents(post.id);
+                }
+
+                // Pagination
+                trendingHasMore = !!data.next;
+                trendingPage = page;
+                trendingLoadMore.style.display = trendingHasMore ? 'block' : 'none';
+                trendingLoadMoreBtn.textContent = 'Load more';
+                trendingLoadMoreBtn.disabled = false;
+
+            } catch (err) {
+                if (page === 1) {
+                    trendingPosts.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state__icon">⚠️</div>
+                            <div class="empty-state__title">Failed to load trending</div>
+                            <div class="empty-state__text"><button class="btn-text-link" onclick="location.reload()">Retry</button></div>
+                        </div>`;
+                } else {
+                    window.app.showToast('Failed to load more posts.', 'error');
+                    trendingLoadMoreBtn.textContent = 'Load more';
+                    trendingLoadMoreBtn.disabled = false;
+                }
+            } finally {
+                trendingLoading = false;
+            }
+        }
+
+        trendingLoadMoreBtn.addEventListener('click', () => {
+            if (trendingHasMore) {
+                loadTrending(trendingPage + 1);
+            }
+        });
+
+
+        /* ══════════════════════════════════════════
+           RENDER HELPERS
+           ══════════════════════════════════════════ */
+
+        function renderUserCard(user) {
+            const avatarSrc = user.avatar || window.app.getInitialsAvatar(user.username, 56);
+            const displayName = user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username;
+            const headline = user.headline || 'Conectio member';
+            const followersCount = user.followers_count || 0;
+            const isFollowing = user.is_following || false;
+            const isOwnProfile = currentUser && currentUser.username === user.username;
+
+            let followBtnHtml = '';
+            if (!isOwnProfile) {
+                if (isFollowing) {
+                    followBtnHtml = `<button class="btn-primary btn-primary--sm user-result-card__btn" onclick="followUser(this, '${user.username}')">Following</button>`;
+                } else {
+                    followBtnHtml = `<button class="btn-secondary btn-secondary--sm user-result-card__btn" onclick="followUser(this, '${user.username}')">Follow</button>`;
+                }
+            }
+
+            return `
+            <div class="user-result-card">
+                <a href="profile.html?username=${user.username}">
+                    <img class="user-result-card__avatar" src="${avatarSrc}" alt="${escapeHtml(displayName)}">
+                </a>
+                <div class="user-result-card__info">
+                    <a href="profile.html?username=${user.username}" class="user-result-card__name">${escapeHtml(displayName)}</a>
+                    <div class="user-result-card__headline">${escapeHtml(headline)}</div>
+                    <div class="user-result-card__meta">${followersCount} follower${followersCount !== 1 ? 's' : ''}</div>
+                </div>
+                ${followBtnHtml}
+            </div>
+            `;
+        }
+
+        function renderPeopleScrollCard(user) {
+            const avatarSrc = user.avatar || window.app.getInitialsAvatar(user.username, 56);
+            const displayName = user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username;
+            const headline = user.headline || 'Conectio member';
+            const isFollowing = user.is_following || false;
+            const isOwnProfile = currentUser && currentUser.username === user.username;
+
+            let followBtnHtml = '';
+            if (!isOwnProfile) {
+                if (isFollowing) {
+                    followBtnHtml = `<button class="btn-primary btn-primary--sm" onclick="followUser(this, '${user.username}')" style="padding:4px 14px;font-size:12px;">Following</button>`;
+                } else {
+                    followBtnHtml = `<button class="btn-secondary btn-secondary--sm" onclick="followUser(this, '${user.username}')" style="padding:4px 14px;font-size:12px;">Follow</button>`;
+                }
+            }
+
+            return `
+            <div class="people-scroll-card">
+                <a href="profile.html?username=${user.username}">
+                    <img class="people-scroll-card__avatar" src="${avatarSrc}" alt="${escapeHtml(displayName)}">
+                </a>
+                <a href="profile.html?username=${user.username}" class="people-scroll-card__name">${escapeHtml(displayName)}</a>
+                <div class="people-scroll-card__headline">${escapeHtml(headline)}</div>
+                ${followBtnHtml}
+            </div>
+            `;
+        }
+
+        function renderPostCard(post) {
+            const author = post.author || {};
+            const avatarSrc = author.avatar || window.app.getInitialsAvatar(author.username || 'U', 48);
+            const displayName = `${author.first_name || ''} ${author.last_name || ''}`.trim() || author.username || 'User';
+            const headline = author.headline || '';
+            const timeAgo = post.time_ago || window.app.timeAgo(post.created_at);
+            const content = post.content || '';
+            const isLiked = post.is_liked || false;
+            const likesCount = post.likes_count || 0;
+            const commentsCount = post.comments_count || 0;
+
+            // Truncate
+            const MAX = 280;
+            let displayContent = escapeHtml(content);
+            if (content.length > MAX) {
+                displayContent = escapeHtml(content.substring(0, MAX)) + '...';
+            }
+
+            // Image
+            let imageHtml = '';
+            if (post.image) {
+                const imgUrl = post.image.startsWith('http') ? post.image : `${window.api.BASE.replace('/api', '')}${post.image}`;
+                imageHtml = `<img class="post-card__image" src="${imgUrl}" alt="Post image" loading="lazy">`;
+            }
+
+            return `
+            <div class="post-card" id="post-card-${post.id}" data-post-id="${post.id}">
+                <div class="post-card__header">
+                    <img class="post-card__avatar" src="${avatarSrc}" alt="${escapeHtml(displayName)}"
+                         onclick="window.location.href='profile.html?username=${author.username}'">
+                    <div class="post-card__author-info">
+                        <a class="post-card__author-name" href="profile.html?username=${author.username}">${escapeHtml(displayName)}</a>
+                        <div class="post-card__author-headline">${escapeHtml(headline)}</div>
+                        <div class="post-card__time">${timeAgo}</div>
+                    </div>
+                </div>
+                <div class="post-card__content">${displayContent}</div>
+                ${imageHtml}
+                <div class="post-card__stats">
+                    <span class="post-card__stats-likes">
+                        ${likesCount > 0 ? `<span style="font-size:14px;">👍</span> <span id="likes-count-${post.id}">${likesCount}</span>` : `<span id="likes-count-${post.id}">0</span>`}
+                    </span>
+                    <span>${commentsCount} comment${commentsCount !== 1 ? 's' : ''}</span>
+                </div>
+                <div class="post-card__actions">
+                    <button class="post-card__action-btn ${isLiked ? 'post-card__action-btn--active' : ''}"
+                            data-action="like" data-post-id="${post.id}" id="like-btn-${post.id}" data-liked="${isLiked}">
+                        <span class="post-card__action-icon">👍</span>
+                        <span class="like-label">${isLiked ? 'Liked' : 'Like'}</span>
+                    </button>
+                    <button class="post-card__action-btn" onclick="window.location.href='index.html?post=${post.id}'">
+                        <span class="post-card__action-icon">💬</span>
+                        <span>Comment</span>
+                    </button>
+                    <button class="post-card__action-btn" data-action="share" data-post-id="${post.id}">
+                        <span class="post-card__action-icon">↗️</span>
+                        <span>Share</span>
+                    </button>
+                </div>
+            </div>
+            `;
+        }
+
+        function renderSkeletonCards(count) {
+            let html = '';
+            for (let i = 0; i < count; i++) {
+                html += `
+                <div class="skeleton-post">
+                    <div class="skeleton-post__header">
+                        <div class="skeleton-post__avatar skeleton-shimmer"></div>
+                        <div class="skeleton-post__lines">
+                            <div class="skeleton-post__line skeleton-shimmer" style="width:60%"></div>
+                            <div class="skeleton-post__line skeleton-shimmer" style="width:30%"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-post__body">
+                        <div class="skeleton-post__line skeleton-shimmer" style="width:100%"></div>
+                        <div class="skeleton-post__line skeleton-shimmer" style="width:90%"></div>
+                        <div class="skeleton-post__line skeleton-shimmer" style="width:70%"></div>
+                    </div>
+                    <div class="skeleton-post__footer">
+                        <div class="skeleton-post__btn skeleton-shimmer"></div>
+                        <div class="skeleton-post__btn skeleton-shimmer"></div>
+                        <div class="skeleton-post__btn skeleton-shimmer"></div>
+                    </div>
+                </div>
+                `;
+            }
+            return html;
+        }
+
+        function renderEmptyState(icon, title, subtitle) {
+            return `
+            <div class="empty-state">
+                <div class="empty-state__icon">${icon}</div>
+                <div class="empty-state__title">${title}</div>
+                <div class="empty-state__text">${subtitle}</div>
+            </div>
+            `;
+        }
+
+
+        /* ══════════════════════════════════════════
+           POST CARD EVENTS
+           ══════════════════════════════════════════ */
+        function attachPostCardEvents(postId) {
+            const card = document.getElementById(`post-card-${postId}`);
+            if (!card) return;
+
+            card.addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-action]');
+                if (!btn) return;
+
+                const action = btn.dataset.action;
+                const id = parseInt(btn.dataset.postId);
+
+                if (action === 'like') handleLike(id);
+                if (action === 'share') handleShare(id);
+            });
+        }
+
+        async function handleLike(postId) {
+            if (!window.auth.isLoggedIn()) {
+                window.app.showToast('Sign in to like posts', 'info');
+                return;
+            }
+
+            const btn = document.getElementById(`like-btn-${postId}`);
+            if (!btn || btn.dataset.likeLoading === 'true') return;
+
+            const wasLiked = btn.dataset.liked === 'true';
+            const newLiked = !wasLiked;
+
+            btn.dataset.liked = String(newLiked);
+            btn.dataset.likeLoading = 'true';
+            btn.className = `post-card__action-btn ${newLiked ? 'post-card__action-btn--active' : ''}`;
+            const labelEl = btn.querySelector('.like-label');
+            if (labelEl) labelEl.textContent = newLiked ? 'Liked' : 'Like';
+
+            if (newLiked) {
+                btn.classList.add('like-blip');
+                btn.addEventListener('animationend', () => btn.classList.remove('like-blip'), { once: true });
+            }
+
+            const countEl = document.getElementById(`likes-count-${postId}`);
+            const oldCount = parseInt(countEl?.textContent || 0);
+            const optimisticCount = newLiked ? oldCount + 1 : Math.max(0, oldCount - 1);
+            if (countEl) countEl.textContent = optimisticCount;
+
+            try {
+                const result = await window.api.post(`/posts/${postId}/like/`);
+                btn.dataset.liked = String(result.liked);
+                btn.className = `post-card__action-btn ${result.liked ? 'post-card__action-btn--active' : ''}`;
+                if (labelEl) labelEl.textContent = result.liked ? 'Liked' : 'Like';
+                if (countEl) countEl.textContent = result.likes_count;
+            } catch (err) {
+                btn.dataset.liked = String(wasLiked);
+                btn.className = `post-card__action-btn ${wasLiked ? 'post-card__action-btn--active' : ''}`;
+                if (labelEl) labelEl.textContent = wasLiked ? 'Liked' : 'Like';
+                if (countEl) countEl.textContent = oldCount;
+                window.app.showToast(err.data?.error || 'Failed to like post.', 'error');
+            } finally {
+                btn.dataset.likeLoading = 'false';
+            }
+        }
+
+        function handleShare(postId) {
+            const url = `${window.location.origin}/index.html?post=${postId}`;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url)
+                    .then(() => window.app.showToast('Link copied to clipboard!', 'info'))
+                    .catch(() => window.app.showToast('Link: ' + url, 'info'));
+            } else {
+                window.app.showToast('Link: ' + url, 'info');
+            }
+        }
+
+
+        /* ══════════════════════════════════════════
+           FOLLOW USER
+           ══════════════════════════════════════════ */
+        window.followUser = async function(btn, username) {
+            if (!window.auth.isLoggedIn()) {
+                window.app.showToast('Sign in to follow people', 'info');
+                return;
+            }
+
+            if (btn.disabled) return;
+            btn.disabled = true;
+
+            try {
+                const result = await window.api.post(`/users/follow/${username}/`);
+                if (result.is_following) {
+                    btn.textContent = 'Following';
+                    btn.classList.remove('btn-secondary', 'btn-secondary--sm');
+                    btn.classList.add('btn-primary', 'btn-primary--sm');
+                } else {
+                    btn.textContent = 'Follow';
+                    btn.classList.remove('btn-primary', 'btn-primary--sm');
+                    btn.classList.add('btn-secondary', 'btn-secondary--sm');
+                }
+            } catch (err) {
+                window.app.showToast('Failed to follow.', 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        };
+
+
+        /* ══════════════════════════════════════════
+           UTILITY
+           ══════════════════════════════════════════ */
         function escapeHtml(text) {
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
+
+    })();
     </script>
 </body>
 </html>

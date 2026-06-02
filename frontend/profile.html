@@ -309,6 +309,202 @@
             gap: 4px;
         }
 
+        /* ── Like Animation ───────────────────────── */
+        @keyframes likeBlip {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .like-blip {
+            display: inline-block;
+            animation: likeBlip 300ms ease;
+        }
+
+        /* ── Clickable Stats ──────────────────────── */
+        .profile-stats__item--clickable {
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            transition: background var(--transition-fast);
+        }
+
+        .profile-stats__item--clickable:hover {
+            background: var(--color-bg-hover);
+        }
+
+        /* ── Followers/Following Modal ────────────── */
+        .ff-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 200ms ease;
+            padding: var(--space-base);
+        }
+
+        .ff-modal-overlay[hidden] { display: none; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .ff-modal-card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-elevated);
+            width: 100%;
+            max-width: 480px;
+            max-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            animation: modalSlideUp 300ms ease;
+        }
+
+        @keyframes modalSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ff-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-base) var(--space-lg);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .ff-modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .ff-modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            border: none;
+            background: none;
+            transition: background var(--transition-fast);
+        }
+
+        .ff-modal-close:hover {
+            background: var(--color-bg-hover);
+        }
+
+        .ff-modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-sm) 0;
+        }
+
+        .ff-user-row {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-sm) var(--space-lg);
+            transition: background var(--transition-fast);
+        }
+
+        .ff-user-row:hover {
+            background: var(--color-bg-hover);
+        }
+
+        .ff-user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-full);
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .ff-user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ff-user-name {
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ff-user-name a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .ff-user-name a:hover {
+            color: var(--color-primary);
+            text-decoration: underline;
+        }
+
+        .ff-user-headline {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ff-follow-btn {
+            flex-shrink: 0;
+            padding: 4px 16px;
+            font-size: 13px;
+        }
+
+        .ff-empty {
+            text-align: center;
+            padding: var(--space-xl);
+            color: var(--color-text-secondary);
+            font-size: 14px;
+        }
+
+        .ff-loading {
+            text-align: center;
+            padding: var(--space-xl);
+        }
+
+        /* ── Unfollow Tooltip ─────────────────────── */
+        .unfollow-tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-dropdown);
+            padding: var(--space-md);
+            z-index: 100;
+            white-space: nowrap;
+            animation: fadeIn 150ms ease;
+        }
+
+        .unfollow-tooltip p {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-sm);
+        }
+
+        .unfollow-tooltip__actions {
+            display: flex;
+            gap: var(--space-sm);
+            justify-content: flex-end;
+        }
+
         /* ── Responsive ────────────────────────────── */
         @media (max-width: 768px) {
             .profile-layout {
@@ -371,11 +567,11 @@
 
                     <!-- Stats -->
                     <div class="profile-stats">
-                        <div class="profile-stats__item">
+                        <div class="profile-stats__item profile-stats__item--clickable" id="stats-followers-btn">
                             <span class="profile-stats__value" id="profile-followers">0</span>
                             <span class="profile-stats__label">Followers</span>
                         </div>
-                        <div class="profile-stats__item">
+                        <div class="profile-stats__item profile-stats__item--clickable" id="stats-following-btn">
                             <span class="profile-stats__value" id="profile-following">0</span>
                             <span class="profile-stats__label">Following</span>
                         </div>
@@ -465,6 +661,20 @@
                 <h2 style="margin-bottom: 8px;">User not found</h2>
                 <p class="text-muted" style="margin-bottom: 24px;">This profile doesn't exist or may have been removed.</p>
                 <a href="index.html" class="btn-secondary">Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ═══════════════ FOLLOWERS/FOLLOWING MODAL ═══════════════ -->
+    <div class="ff-modal-overlay" id="ff-modal" hidden>
+        <div class="ff-modal-card">
+            <div class="ff-modal-header">
+                <h3 id="ff-modal-title">Followers</h3>
+                <button class="ff-modal-close" id="ff-modal-close" aria-label="Close">&times;</button>
+            </div>
+            <div class="ff-modal-body" id="ff-modal-body">
+                <div class="ff-loading"><div class="spinner" style="margin: 0 auto;"></div></div>
             </div>
         </div>
     </div>
@@ -652,8 +862,14 @@
                     input.click();
                 });
             } else {
+                const isFollowing = profileData.is_following_them || false;
                 actionsEl.innerHTML = `
-                    <button class="btn-primary" id="btn-follow">Follow</button>
+                    <div style="position: relative; display: inline-block;">
+                        <button class="${isFollowing ? 'btn-secondary' : 'btn-primary'}" id="btn-follow" data-following="${isFollowing}">
+                            ${isFollowing ? '✓ Following' : 'Follow'}
+                        </button>
+                        <div id="unfollow-tooltip-container"></div>
+                    </div>
                     <button class="btn-secondary" id="btn-message">Message</button>
                 `;
                 document.getElementById('btn-follow').addEventListener('click', handleFollow);
@@ -661,6 +877,10 @@
                     window.app.showToast('Messaging coming soon!', 'info');
                 });
             }
+
+            // Followers/following click handlers (both own and other profiles)
+            document.getElementById('stats-followers-btn').addEventListener('click', () => openFFModal('followers'));
+            document.getElementById('stats-following-btn').addEventListener('click', () => openFFModal('following'));
         }
 
 
@@ -815,22 +1035,81 @@
             const btn = document.getElementById('btn-follow');
             if (!btn) return;
 
+            const isCurrentlyFollowing = btn.dataset.following === 'true';
+
+            // If currently following, show unfollow confirmation
+            if (isCurrentlyFollowing) {
+                showUnfollowTooltip();
+                return;
+            }
+
+            // Follow action
+            await doFollow();
+        }
+
+        function showUnfollowTooltip() {
+            const container = document.getElementById('unfollow-tooltip-container');
+            if (!container) return;
+
+            // Toggle off if already showing
+            if (container.innerHTML.trim()) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const displayName = profileData.full_name || profileData.username;
+            container.innerHTML = `
+                <div class="unfollow-tooltip">
+                    <p>Unfollow ${window.app.escapeHtml(displayName)}?</p>
+                    <div class="unfollow-tooltip__actions">
+                        <button class="btn-secondary btn-secondary--sm" style="padding:4px 12px;font-size:12px;" id="unfollow-cancel">Cancel</button>
+                        <button class="btn-primary btn-primary--sm" style="padding:4px 12px;font-size:12px;background:var(--color-error);" id="unfollow-confirm">Unfollow</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('unfollow-cancel').addEventListener('click', () => {
+                container.innerHTML = '';
+            });
+            document.getElementById('unfollow-confirm').addEventListener('click', async () => {
+                container.innerHTML = '';
+                await doFollow();
+            });
+
+            // Close on outside click
+            setTimeout(() => {
+                const outsideHandler = (e) => {
+                    if (!container.contains(e.target) && e.target.id !== 'btn-follow') {
+                        container.innerHTML = '';
+                        document.removeEventListener('click', outsideHandler);
+                    }
+                };
+                document.addEventListener('click', outsideHandler);
+            }, 0);
+        }
+
+        async function doFollow() {
+            const btn = document.getElementById('btn-follow');
+            if (!btn) return;
+            btn.disabled = true;
+
             try {
                 const result = await window.api.post(`/users/follow/${profileData.username}/`);
-                if (result.status === 'followed') {
-                    btn.textContent = 'Following';
-                    btn.classList.remove('btn-primary');
-                    btn.classList.add('btn-secondary');
-                    profileData.followers_count = (profileData.followers_count || 0) + 1;
+                if (result.is_following) {
+                    btn.textContent = '✓ Following';
+                    btn.className = 'btn-secondary';
+                    btn.dataset.following = 'true';
                 } else {
                     btn.textContent = 'Follow';
-                    btn.classList.remove('btn-secondary');
-                    btn.classList.add('btn-primary');
-                    profileData.followers_count = Math.max(0, (profileData.followers_count || 0) - 1);
+                    btn.className = 'btn-primary';
+                    btn.dataset.following = 'false';
                 }
-                document.getElementById('profile-followers').textContent = profileData.followers_count;
+                profileData.followers_count = result.followers_count;
+                document.getElementById('profile-followers').textContent = result.followers_count;
             } catch (err) {
                 window.app.showToast('Failed: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
             }
         }
 
@@ -895,7 +1174,7 @@
                         ${headline ? `<div style="font-size:12px;color:var(--color-text-secondary);">${window.app.escapeHtml(headline)}</div>` : ''}
                         <div style="font-size:12px;color:var(--color-text-secondary);">${timeAgoStr}</div>
                     </div>
-                    ${isOwn ? `<button style="border:none;background:none;cursor:pointer;font-size:18px;color:var(--color-text-secondary);padding:4px;" data-action="menu" data-post-id="${post.id}">⋯</button>` : ''}
+                    ${isOwn ? `<div style="margin-left:auto;flex-shrink:0;position:relative;"><button style="border:none;background:none;cursor:pointer;font-size:18px;color:var(--color-text-secondary);padding:4px;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 150ms ease;" data-action="menu" data-post-id="${post.id}" onmouseover="this.style.background='var(--color-bg-hover)'" onmouseout="this.style.background='none'">⋯</button><div id="profile-dropdown-${post.id}"></div></div>` : ''}
                 </div>
                 <div style="padding:0 16px 12px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;" id="profile-post-content-${post.id}">
                     ${isTruncated ? `<span class="truncated-text">${displayContent}...</span><button style="color:var(--color-text-secondary);font-weight:600;border:none;background:none;cursor:pointer;font-size:14px;" data-action="see-more" data-post-id="${post.id}">see more</button><span class="full-text" style="display:none;">${fullContent}</span>` : fullContent}
@@ -906,15 +1185,14 @@
                     <span><span id="profile-comments-count-${post.id}">${commentsCount}</span> comment${commentsCount !== 1 ? 's' : ''}</span>
                 </div>
                 <div style="display:flex;border-top:1px solid var(--color-border);">
-                    <button style="flex:1;padding:10px 0;font-size:14px;font-weight:600;color:${isLiked ? 'var(--color-primary)' : 'var(--color-text-secondary)'};border:none;background:none;cursor:pointer;transition:background 150ms ease;" id="profile-like-btn-${post.id}" data-action="like" data-post-id="${post.id}" onmouseover="this.style.background='var(--color-bg-hover)'" onmouseout="this.style.background='none'">
-                        👍 ${isLiked ? 'Liked' : 'Like'}
+                    <button style="flex:1;padding:10px 0;font-size:14px;font-weight:600;color:${isLiked ? 'var(--color-primary)' : 'var(--color-text-secondary)'};border:none;background:none;cursor:pointer;transition:background 150ms ease;" id="profile-like-btn-${post.id}" data-action="like" data-post-id="${post.id}" data-liked="${isLiked}" onmouseover="this.style.background='var(--color-bg-hover)'" onmouseout="this.style.background='none'">
+                        <span class="profile-like-icon">👍</span> <span class="profile-like-label">${isLiked ? 'Liked' : 'Like'}</span>
                     </button>
                     <button style="flex:1;padding:10px 0;font-size:14px;font-weight:600;color:var(--color-text-secondary);border:none;background:none;cursor:pointer;transition:background 150ms ease;" data-action="comment" data-post-id="${post.id}" onmouseover="this.style.background='var(--color-bg-hover)'" onmouseout="this.style.background='none'">
                         💬 Comment
                     </button>
                 </div>
                 <div id="profile-comments-section-${post.id}"></div>
-                <div id="profile-delete-confirm-${post.id}"></div>
             </div>
             `;
         }
@@ -935,25 +1213,66 @@
                     case 'comment': toggleProfileComments(id); break;
                     case 'see-more': handleProfileSeeMore(id); break;
                     case 'menu': handleProfilePostMenu(id); break;
-                    case 'cancel-delete': document.getElementById(`profile-delete-confirm-${id}`).innerHTML = ''; break;
+                    case 'save-post': closeProfileDropdowns(); window.app.showToast('Post saved! (Coming soon)', 'info'); break;
+                    case 'copy-link': closeProfileDropdowns(); handleProfileCopyLink(id); break;
+                    case 'delete-post': showProfileDeleteConfirm(id); break;
+                    case 'cancel-delete': closeProfileDropdowns(); break;
                     case 'confirm-delete': deleteProfilePost(id); break;
                 }
             });
         }
 
         async function handleProfileLike(postId) {
+            // Check login
+            if (!window.auth.isLoggedIn()) {
+                window.app.showToast('Sign in to like posts', 'info');
+                return;
+            }
+
+            const btn = document.getElementById(`profile-like-btn-${postId}`);
+            if (!btn || btn.dataset.likeLoading === 'true') return;
+
+            const wasLiked = btn.dataset.liked === 'true';
+            const newLiked = !wasLiked;
+
+            // Optimistic UI
+            btn.dataset.liked = String(newLiked);
+            btn.dataset.likeLoading = 'true';
+            btn.style.color = newLiked ? 'var(--color-primary)' : 'var(--color-text-secondary)';
+            const labelEl = btn.querySelector('.profile-like-label');
+            if (labelEl) labelEl.textContent = newLiked ? 'Liked' : 'Like';
+
+            // Animation
+            if (newLiked) {
+                const iconEl = btn.querySelector('.profile-like-icon');
+                if (iconEl) {
+                    iconEl.classList.add('like-blip');
+                    iconEl.addEventListener('animationend', () => iconEl.classList.remove('like-blip'), { once: true });
+                }
+            }
+
+            // Optimistic count
+            const countEl = document.getElementById(`profile-likes-${postId}`);
+            const oldCount = parseInt(countEl?.textContent || 0);
+            const optimisticCount = newLiked ? oldCount + 1 : Math.max(0, oldCount - 1);
+            if (countEl) countEl.textContent = optimisticCount;
+
             try {
                 const result = await window.api.post(`/posts/${postId}/like/`);
-                const btn = document.getElementById(`profile-like-btn-${postId}`);
-                const isLiked = result.status === 'liked';
-                if (btn) {
-                    btn.style.color = isLiked ? 'var(--color-primary)' : 'var(--color-text-secondary)';
-                    btn.innerHTML = `👍 ${isLiked ? 'Liked' : 'Like'}`;
-                }
-                const countEl = document.getElementById(`profile-likes-${postId}`);
+                btn.dataset.liked = String(result.liked);
+                btn.style.color = result.liked ? 'var(--color-primary)' : 'var(--color-text-secondary)';
+                if (labelEl) labelEl.textContent = result.liked ? 'Liked' : 'Like';
                 if (countEl) countEl.textContent = result.likes_count;
             } catch (err) {
-                window.app.showToast('Failed to like post.', 'error');
+                // Revert
+                btn.dataset.liked = String(wasLiked);
+                btn.style.color = wasLiked ? 'var(--color-primary)' : 'var(--color-text-secondary)';
+                if (labelEl) labelEl.textContent = wasLiked ? 'Liked' : 'Like';
+                if (countEl) countEl.textContent = oldCount;
+                const msg = err.data?.error || 'Failed to like post.';
+                window.app.showToast(msg, 'error');
+            } finally {
+                btn.dataset.likeLoading = 'false';
             }
         }
 
@@ -969,24 +1288,86 @@
         }
 
         function handleProfilePostMenu(postId) {
-            const container = document.getElementById(`profile-delete-confirm-${postId}`);
+            const container = document.getElementById(`profile-dropdown-${postId}`);
             if (!container) return;
+
             if (container.innerHTML.trim()) {
-                container.innerHTML = '';
+                closeProfileDropdowns();
                 return;
             }
+
+            closeProfileDropdowns();
+
             container.innerHTML = `
-                <div style="padding:12px 16px;background:rgba(204,16,22,0.05);border-top:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;">
-                    <span style="font-size:13px;color:var(--color-text-secondary);">Delete this post?</span>
-                    <div style="display:flex;gap:8px;">
-                        <button class="btn-secondary btn-secondary--sm" data-action="cancel-delete" data-post-id="${postId}" style="padding:4px 12px;font-size:13px;">Cancel</button>
-                        <button class="btn-primary btn-primary--sm" data-action="confirm-delete" data-post-id="${postId}" style="padding:4px 12px;font-size:13px;background:var(--color-error);">Delete</button>
+                <div style="position:absolute;top:100%;right:0;margin-top:4px;min-width:200px;background:var(--color-bg-card);border-radius:var(--radius-md);box-shadow:0 4px 12px rgba(0,0,0,0.15);padding:6px 0;z-index:100;animation:fadeIn 150ms ease;">
+                    <button style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;font-size:14px;color:var(--color-text-primary);border:none;background:none;cursor:pointer;text-align:left;transition:background 150ms ease;" data-action="save-post" data-post-id="${postId}" onmouseover="this.style.background='var(--color-bg-hover)'" onmouseout="this.style.background='none'">
+                        <span style="font-size:18px;width:22px;text-align:center;">🔖</span>
+                        Save post
+                    </button>
+                    <button style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;font-size:14px;color:var(--color-text-primary);border:none;background:none;cursor:pointer;text-align:left;transition:background 150ms ease;" data-action="copy-link" data-post-id="${postId}" onmouseover="this.style.background='var(--color-bg-hover)'" onmouseout="this.style.background='none'">
+                        <span style="font-size:18px;width:22px;text-align:center;">🔗</span>
+                        Copy link
+                    </button>
+                    <div style="height:1px;background:var(--color-border);margin:4px 0;"></div>
+                    <button style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;font-size:14px;color:var(--color-error);border:none;background:none;cursor:pointer;text-align:left;transition:background 150ms ease;" data-action="delete-post" data-post-id="${postId}" onmouseover="this.style.background='rgba(204,16,22,0.06)'" onmouseout="this.style.background='none'">
+                        <span style="font-size:18px;width:22px;text-align:center;">🗑️</span>
+                        Delete post
+                    </button>
+                </div>
+            `;
+
+            setTimeout(() => {
+                document.addEventListener('click', handleProfileOutsideClick);
+            }, 0);
+        }
+
+        function handleProfileOutsideClick(e) {
+            if (!e.target.closest('[id^="profile-dropdown-"]') && !e.target.closest('[data-action="menu"]')) {
+                closeProfileDropdowns();
+            }
+        }
+
+        function closeProfileDropdowns() {
+            document.querySelectorAll('[id^="profile-dropdown-"]').forEach(el => el.innerHTML = '');
+            document.removeEventListener('click', handleProfileOutsideClick);
+        }
+
+        function showProfileDeleteConfirm(postId) {
+            // Remove outside click listener to prevent race condition
+            document.removeEventListener('click', handleProfileOutsideClick);
+
+            const container = document.getElementById(`profile-dropdown-${postId}`);
+            if (!container) return;
+
+            container.innerHTML = `
+                <div style="position:absolute;top:100%;right:0;margin-top:4px;min-width:220px;background:var(--color-bg-card);border-radius:var(--radius-md);box-shadow:0 4px 12px rgba(0,0,0,0.15);padding:12px 16px;z-index:100;animation:fadeIn 150ms ease;">
+                    <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;">Are you sure? This can't be undone.</p>
+                    <div style="display:flex;gap:8px;justify-content:flex-end;">
+                        <button class="btn-secondary btn-secondary--sm" data-action="cancel-delete" data-post-id="${postId}" style="padding:5px 14px;font-size:13px;">Cancel</button>
+                        <button class="btn-primary btn-primary--sm" data-action="confirm-delete" data-post-id="${postId}" style="padding:5px 14px;font-size:13px;background:var(--color-error);">Delete</button>
                     </div>
                 </div>
             `;
+
+            // Re-add outside click listener
+            setTimeout(() => {
+                document.addEventListener('click', handleProfileOutsideClick);
+            }, 0);
+        }
+
+        function handleProfileCopyLink(postId) {
+            const url = `${window.location.origin}/profile.html?post=${postId}`;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url)
+                    .then(() => window.app.showToast('Link copied to clipboard!', 'info'))
+                    .catch(() => window.app.showToast('Link: ' + url, 'info'));
+            } else {
+                window.app.showToast('Link: ' + url, 'info');
+            }
         }
 
         async function deleteProfilePost(postId) {
+            closeProfileDropdowns();
             try {
                 await window.api.delete(`/posts/${postId}/`);
                 const card = document.getElementById(`profile-post-${postId}`);
@@ -1140,6 +1521,126 @@
                 window.app.showToast('Comment deleted.', 'success');
             } catch (err) {
                 window.app.showToast('Failed to delete comment.', 'error');
+            }
+        }
+        /* ══════════════════════════════════════════
+           FOLLOWERS / FOLLOWING MODAL
+           ══════════════════════════════════════════ */
+        const ffModal = document.getElementById('ff-modal');
+        const ffModalTitle = document.getElementById('ff-modal-title');
+        const ffModalBody = document.getElementById('ff-modal-body');
+
+        // Close modal
+        document.getElementById('ff-modal-close').addEventListener('click', closeFFModal);
+        ffModal.addEventListener('click', (e) => {
+            if (e.target === ffModal) closeFFModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !ffModal.hidden) closeFFModal();
+        });
+
+        function closeFFModal() {
+            ffModal.hidden = true;
+            document.body.style.overflow = '';
+        }
+
+        async function openFFModal(type) {
+            if (!profileData) return;
+            const username = profileData.username;
+
+            ffModal.hidden = false;
+            document.body.style.overflow = 'hidden';
+            ffModalTitle.textContent = type === 'followers' ? 'Followers' : 'Following';
+            ffModalBody.innerHTML = '<div class="ff-loading"><div class="spinner" style="margin: 0 auto;"></div></div>';
+
+            try {
+                const endpoint = `/users/${username}/${type}/`;
+                const data = await window.api.get(endpoint);
+                const users = data.results || data || [];
+                renderFFModal(users, type);
+            } catch (err) {
+                ffModalBody.innerHTML = '<div class="ff-empty">Failed to load. Please try again.</div>';
+            }
+        }
+
+        function renderFFModal(users, type) {
+            if (users.length === 0) {
+                ffModalBody.innerHTML = `<div class="ff-empty">No ${type} yet.</div>`;
+                return;
+            }
+
+            const currentUser = window.auth.getCurrentUser();
+
+            ffModalBody.innerHTML = users.map(u => {
+                const avatarSrc = u.avatar || window.app.getInitialsAvatar(u.username, 48);
+                const displayName = `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username;
+                const isSelf = currentUser && u.id === currentUser.id;
+                const isFollowing = u.is_following || false;
+
+                let btnHtml = '';
+                if (!isSelf) {
+                    if (isFollowing) {
+                        btnHtml = `<button class="btn-secondary btn-secondary--sm ff-follow-btn" data-ff-username="${u.username}" data-ff-following="true">✓ Following</button>`;
+                    } else {
+                        btnHtml = `<button class="btn-secondary btn-secondary--sm ff-follow-btn" data-ff-username="${u.username}" data-ff-following="false">Follow</button>`;
+                    }
+                }
+
+                return `
+                    <div class="ff-user-row">
+                        <a href="profile.html?username=${u.username}">
+                            <img class="ff-user-avatar" src="${avatarSrc}" alt="${window.app.escapeHtml(displayName)}">
+                        </a>
+                        <div class="ff-user-info">
+                            <div class="ff-user-name"><a href="profile.html?username=${u.username}">${window.app.escapeHtml(displayName)}</a></div>
+                            <div class="ff-user-headline">${window.app.escapeHtml(u.headline || 'Conectio member')}</div>
+                        </div>
+                        ${btnHtml}
+                    </div>
+                `;
+            }).join('');
+
+            // Attach follow button events in modal
+            ffModalBody.querySelectorAll('.ff-follow-btn').forEach(btn => {
+                btn.addEventListener('click', () => followFromModal(btn));
+            });
+        }
+
+        async function followFromModal(btn) {
+            const username = btn.dataset.ffUsername;
+            if (!username || btn.disabled) return;
+            btn.disabled = true;
+
+            try {
+                const result = await window.api.post(`/users/follow/${username}/`);
+                if (result.is_following) {
+                    btn.textContent = '✓ Following';
+                    btn.dataset.ffFollowing = 'true';
+                    btn.classList.remove('btn-primary', 'btn-primary--sm');
+                    btn.classList.add('btn-secondary', 'btn-secondary--sm');
+                } else {
+                    btn.textContent = 'Follow';
+                    btn.dataset.ffFollowing = 'false';
+                    btn.classList.remove('btn-primary', 'btn-primary--sm');
+                    btn.classList.add('btn-secondary', 'btn-secondary--sm');
+                }
+
+                // Update profile page followers count if viewing someone's profile
+                if (username === profileData.username) {
+                    profileData.followers_count = result.followers_count;
+                    document.getElementById('profile-followers').textContent = result.followers_count;
+                    // Also update the follow button state on the profile card
+                    const profileFollowBtn = document.getElementById('btn-follow');
+                    if (profileFollowBtn) {
+                        profileFollowBtn.dataset.following = String(result.is_following);
+                        profileFollowBtn.textContent = result.is_following ? '✓ Following' : 'Follow';
+                        profileFollowBtn.className = result.is_following ? 'btn-secondary' : 'btn-primary';
+                    }
+                }
+            } catch (err) {
+                window.app.showToast('Failed to follow.', 'error');
+            } finally {
+                btn.disabled = false;
             }
         }
 
