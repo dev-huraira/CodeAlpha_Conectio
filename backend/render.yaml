@@ -9,7 +9,7 @@ services:
     name: conectio-backend
     env: python
     plan: free
-    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py create_superuser_env && python manage.py seed_users --clear && python manage.py seed_posts"
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py create_superuser_env"
     startCommand: gunicorn conectio_project.wsgi
     envVars:
       - key: SECRET_KEY
