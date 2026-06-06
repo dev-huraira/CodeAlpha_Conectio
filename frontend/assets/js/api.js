@@ -5,7 +5,7 @@
 
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:8000/api'
-    : 'https://YOUR-RENDER-URL.onrender.com/api';
+    : 'https://conectio-backend.onrender.com/api';
 
 /**
  * Core fetch wrapper that automatically attaches JWT tokens,
