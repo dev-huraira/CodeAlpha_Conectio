@@ -27,3 +27,6 @@ Thumbs.db
 
 # Media uploads
 backend/media/
+
+# Django static files (collected)
+backend/staticfiles/

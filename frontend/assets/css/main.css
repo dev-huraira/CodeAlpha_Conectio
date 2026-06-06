@@ -199,6 +199,10 @@ body {
     color: var(--color-text-primary);
 }
 
+.navbar__link:hover .navbar__link-label {
+    text-decoration: underline;
+}
+
 .navbar__link--active {
     color: var(--color-text-primary);
 }
@@ -222,6 +226,7 @@ body {
 .navbar__link-label {
     font-size: var(--font-size-xs);
     white-space: nowrap;
+    transition: text-decoration var(--transition-fast);
 }
 
 .navbar__cta {
@@ -445,5 +450,33 @@ body {
 
     .hero__actions {
         flex-direction: column;
+    }
+}
+
+@media (max-width: 375px) {
+    :root {
+        --font-size-hero: 24px;
+        --font-size-2xl: 24px;
+    }
+
+    .navbar__logo {
+        font-size: 18px;
+    }
+
+    .navbar__logo-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+
+    .hero__features {
+        flex-wrap: wrap;
+        gap: var(--space-base);
+    }
+
+    .hero__feature-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
     }
 }

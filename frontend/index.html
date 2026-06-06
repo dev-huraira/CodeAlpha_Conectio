@@ -506,7 +506,7 @@
         }
 
         .post-card:hover {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 0 0 2px var(--color-border);
         }
 
         .post-card__header {
@@ -668,6 +668,16 @@
             color: var(--color-text-primary);
             word-wrap: break-word;
             white-space: pre-wrap;
+            overflow: hidden;
+            transition: max-height 400ms ease;
+        }
+
+        .post-card__content--truncated {
+            max-height: 120px;
+        }
+
+        .post-card__content--expanded {
+            max-height: 5000px;
         }
 
         .post-card__see-more {
@@ -678,6 +688,9 @@
             background: none;
             font-size: var(--font-size-base);
             padding: 0;
+            margin-top: 4px;
+            display: inline-block;
+            transition: color var(--transition-fast);
         }
 
         .post-card__see-more:hover {
@@ -689,6 +702,20 @@
             max-height: 512px;
             object-fit: cover;
             display: block;
+            cursor: pointer;
+            transition: opacity var(--transition-fast);
+        }
+
+        .post-card__image:hover {
+            opacity: 0.95;
+        }
+
+        .post-card__author-name {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-block;
         }
 
         .post-card__stats {
@@ -1275,7 +1302,7 @@
                             </div>
                         </div>
                         <div class="mini-profile__items">
-                            <div class="mini-profile__item" onclick="window.app.showToast('Saved posts coming soon!', 'info')">
+                            <div class="mini-profile__item" onclick="window.location.href='profile.html?tab=saved'" style="cursor:pointer;">
                                 <span class="mini-profile__item-icon">🔖</span>
                                 Saved posts
                             </div>
@@ -1350,7 +1377,7 @@
                     <hr class="divider divider--lg">
 
                     <div class="sidebar-footer">
-                        <a href="#">About</a> · <a href="#">Help</a> · <a href="#">Privacy</a> · <a href="#">Terms</a>
+                        <a href="about.html">About</a> · <a href="help.html">Help</a> · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a>
                         <span class="sidebar-footer__brand">Conectio © 2025 · Connect with purpose.</span>
                     </div>
                 </aside>
@@ -1395,12 +1422,52 @@
 
     <input type="file" id="composer-image-input" accept="image/*" style="display: none;">
 
+    <!-- ═══════════════ CROP MODAL ═══════════════ -->
+    <div class="modal-overlay" id="crop-modal" hidden>
+        <div class="modal-card" style="max-width:560px;">
+            <div class="modal-header">
+                <h2 class="modal-header__title">Crop Image</h2>
+                <button class="modal-close" id="crop-close-btn" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:0;background:#000;">
+                <img id="crop-image" style="max-width:100%;display:block;">
+            </div>
+            <div class="modal-footer" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                <div style="display:flex;gap:6px;">
+                    <button class="btn-secondary btn-secondary--sm crop-ratio-btn" data-ratio="NaN" title="Original">Original</button>
+                    <button class="btn-secondary btn-secondary--sm crop-ratio-btn" data-ratio="1" title="1:1">1:1</button>
+                    <button class="btn-secondary btn-secondary--sm crop-ratio-btn" data-ratio="1.778" title="16:9">16:9</button>
+                </div>
+                <div style="display:flex;gap:4px;">
+                    <button class="btn-secondary btn-secondary--sm" id="crop-zoom-in" title="Zoom in">🔍+</button>
+                    <button class="btn-secondary btn-secondary--sm" id="crop-zoom-out" title="Zoom out">🔍−</button>
+                    <button class="btn-secondary btn-secondary--sm" id="crop-rotate-left" title="Rotate left">↺</button>
+                    <button class="btn-secondary btn-secondary--sm" id="crop-rotate-right" title="Rotate right">↻</button>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn-secondary" id="crop-cancel-btn">Cancel</button>
+                    <button class="btn-primary" id="crop-apply-btn">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- ═══════════════ FOOTER ═══════════════ -->
     <footer class="footer" id="footer">
         <span class="footer__brand">Conectio</span> &copy; 2025 · Connect with purpose.
+        <span style="margin-left:8px;">
+            <a href="about.html" style="color:var(--color-text-secondary);font-size:12px;">About</a> ·
+            <a href="help.html" style="color:var(--color-text-secondary);font-size:12px;">Help</a> ·
+            <a href="privacy.html" style="color:var(--color-text-secondary);font-size:12px;">Privacy</a> ·
+            <a href="terms.html" style="color:var(--color-text-secondary);font-size:12px;">Terms</a>
+        </span>
     </footer>
 
+
+    <!-- Cropper.js CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
     <!-- Scripts -->
     <script src="assets/js/api.js"></script>
@@ -1421,6 +1488,7 @@
         let composerImageFile = null;
         let openCommentSections = new Set();
         let currentSort = 'recent'; // 'recent' = /api/feed/, 'top' = /api/explore/
+        let savedPostIds = new Set();
 
         /* ══════════════════════════════════════════
            DOM REFS
@@ -1462,6 +1530,13 @@
                 setupSortTabs();
                 loadFeed();
                 loadSuggestedUsers();
+
+                // Fetch saved post IDs
+                try {
+                    const savedData = await window.api.get('/users/me/saved/');
+                    const savedPosts = savedData.results || savedData || [];
+                    savedPostIds = new Set(savedPosts.map(p => p.id));
+                } catch (e) { /* ignore */ }
             } else {
                 heroSection.style.display = '';
                 feedSection.style.display = 'none';
@@ -1597,13 +1672,114 @@
                 return;
             }
 
-            composerImageFile = file;
+            // Open crop modal instead of directly previewing
+            openCropModal(file);
+        }
+
+        /* ── Crop Modal Logic (Fix 9) ────────────── */
+        let cropperInstance = null;
+
+        function openCropModal(file) {
+            const cropModal = document.getElementById('crop-modal');
+            const cropImage = document.getElementById('crop-image');
+
             const reader = new FileReader();
             reader.onload = (ev) => {
-                composerImagePreviewImg.src = ev.target.result;
-                composerImagePreview.style.display = 'block';
+                cropImage.src = ev.target.result;
+                cropModal.hidden = false;
+                document.body.style.overflow = 'hidden';
+
+                // Destroy previous cropper if any
+                if (cropperInstance) {
+                    cropperInstance.destroy();
+                    cropperInstance = null;
+                }
+
+                // Init Cropper.js
+                cropperInstance = new Cropper(cropImage, {
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 1,
+                    responsive: true,
+                    background: false,
+                    checkOrientation: false,
+                });
+
+                // Highlight 'Original' ratio button by default
+                document.querySelectorAll('.crop-ratio-btn').forEach(b => {
+                    b.classList.remove('btn-primary', 'btn-primary--sm');
+                    b.classList.add('btn-secondary', 'btn-secondary--sm');
+                });
+                const origBtn = document.querySelector('.crop-ratio-btn[data-ratio="NaN"]');
+                if (origBtn) {
+                    origBtn.classList.remove('btn-secondary', 'btn-secondary--sm');
+                    origBtn.classList.add('btn-primary', 'btn-primary--sm');
+                }
             };
             reader.readAsDataURL(file);
+        }
+
+        // Ratio buttons
+        document.addEventListener('click', (e) => {
+            const ratioBtn = e.target.closest('.crop-ratio-btn');
+            if (!ratioBtn || !cropperInstance) return;
+
+            const ratio = parseFloat(ratioBtn.dataset.ratio);
+            cropperInstance.setAspectRatio(isNaN(ratio) ? NaN : ratio);
+
+            // Highlight active
+            document.querySelectorAll('.crop-ratio-btn').forEach(b => {
+                b.classList.remove('btn-primary', 'btn-primary--sm');
+                b.classList.add('btn-secondary', 'btn-secondary--sm');
+            });
+            ratioBtn.classList.remove('btn-secondary', 'btn-secondary--sm');
+            ratioBtn.classList.add('btn-primary', 'btn-primary--sm');
+        });
+
+        // Zoom & Rotate buttons
+        document.getElementById('crop-zoom-in').addEventListener('click', () => {
+            if (cropperInstance) cropperInstance.zoom(0.1);
+        });
+        document.getElementById('crop-zoom-out').addEventListener('click', () => {
+            if (cropperInstance) cropperInstance.zoom(-0.1);
+        });
+        document.getElementById('crop-rotate-left').addEventListener('click', () => {
+            if (cropperInstance) cropperInstance.rotate(-45);
+        });
+        document.getElementById('crop-rotate-right').addEventListener('click', () => {
+            if (cropperInstance) cropperInstance.rotate(45);
+        });
+
+        // Apply crop
+        document.getElementById('crop-apply-btn').addEventListener('click', () => {
+            if (!cropperInstance) return;
+
+            const canvas = cropperInstance.getCroppedCanvas({
+                maxWidth: 1920,
+                maxHeight: 1080,
+            });
+
+            canvas.toBlob((blob) => {
+                composerImageFile = new File([blob], 'cropped-image.jpg', { type: 'image/jpeg' });
+                composerImagePreviewImg.src = canvas.toDataURL('image/jpeg');
+                composerImagePreview.style.display = 'block';
+                closeCropModal();
+            }, 'image/jpeg', 0.9);
+        });
+
+        // Cancel crop
+        document.getElementById('crop-cancel-btn').addEventListener('click', closeCropModal);
+        document.getElementById('crop-close-btn').addEventListener('click', closeCropModal);
+
+        function closeCropModal() {
+            const cropModal = document.getElementById('crop-modal');
+            cropModal.hidden = true;
+            document.body.style.overflow = '';
+            if (cropperInstance) {
+                cropperInstance.destroy();
+                cropperInstance = null;
+            }
+            composerImageInput.value = '';
         }
 
         function removeImage() {
@@ -1645,6 +1821,7 @@
                 miniPostsEl.textContent = parseInt(miniPostsEl.textContent || 0) + 1;
 
                 window.app.showToast('Post shared!', 'success');
+                window.app.addNotification('You shared a new post', '📝');
             } catch (err) {
                 const msg = err.data ? Object.values(err.data).flat().join(', ') : err.message;
                 window.app.showToast('Failed to post: ' + msg, 'error');
@@ -1846,7 +2023,7 @@
             const avatarSrc = author.avatar || window.app.getInitialsAvatar(author.username || 'U', 48);
             const displayName = `${author.first_name || ''} ${author.last_name || ''}`.trim() || author.username || 'User';
             const headline = author.headline || '';
-            const timeAgo = post.time_ago || window.app.timeAgo(post.created_at);
+            const timeAgo = post.time_ago || window.app.formatTimeAgo(post.created_at);
             const content = post.content || '';
             const isLiked = post.is_liked || false;
 
@@ -1867,7 +2044,7 @@
             let imageHtml = '';
             if (post.image) {
                 const imgUrl = post.image.startsWith('http') ? post.image : `${window.api.BASE.replace('/api', '')}${post.image}`;
-                imageHtml = `<img class="post-card__image" src="${imgUrl}" alt="Post image" loading="lazy">`;
+                imageHtml = `<img class="post-card__image" src="${imgUrl}" alt="Post image" loading="lazy" onclick="window.app.openLightbox('${imgUrl}')">`;
             }
 
             // Stats
@@ -1889,21 +2066,16 @@
                         <div class="post-card__author-headline">${window.app.escapeHtml(headline)}</div>
                         <div class="post-card__time">${timeAgo}</div>
                     </div>
-                    ${isOwn ? `
                     <div class="post-card__menu-wrap">
                         <button class="post-card__menu-btn" data-action="menu" data-post-id="${post.id}" title="More options">⋯</button>
                         <div id="post-dropdown-${post.id}"></div>
                     </div>
-                    ` : ''}
                 </div>
 
-                <div class="post-card__content" id="post-content-${post.id}">
-                    ${isTruncated ? `
-                        <span class="post-content-truncated">${displayContent}...</span>
-                        <button class="post-card__see-more" data-action="see-more" data-post-id="${post.id}">see more</button>
-                        <span class="post-content-full" style="display:none;">${fullContent}</span>
-                    ` : fullContent}
+                <div class="post-card__content ${isTruncated ? 'post-card__content--truncated' : ''}" id="post-content-${post.id}">
+                    ${fullContent}
                 </div>
+                ${isTruncated ? `<div style="padding: 0 16px 8px;"><button class="post-card__see-more" data-action="see-more" data-post-id="${post.id}">...See more</button></div>` : ''}
 
                 ${imageHtml}
 
@@ -1911,7 +2083,7 @@
                     <span class="post-card__stats-likes">
                         ${likesCount > 0 ? `<span style="font-size: 14px;">👍</span> <span id="likes-count-${post.id}">${likesCount}</span>` : `<span id="likes-count-${post.id}">0</span>`}
                     </span>
-                    <span>
+                    <span style="cursor:pointer;" data-action="comment" data-post-id="${post.id}">
                         <span id="comments-count-${post.id}">${commentsCount}</span> comment${commentsCount !== 1 ? 's' : ''}
                     </span>
                 </div>
@@ -2010,6 +2182,10 @@
                 btn.className = `post-card__action-btn ${result.liked ? 'post-card__action-btn--active' : ''}`;
                 if (labelEl) labelEl.textContent = result.liked ? 'Liked' : 'Like';
                 updateLikesDisplay(postId, result.likes_count);
+
+                if (result.liked) {
+                    window.app.addNotification('You liked a post', '👍');
+                }
             } catch (err) {
                 // Revert optimistic update
                 btn.dataset.liked = String(wasLiked);
@@ -2039,12 +2215,20 @@
         function handleSeeMore(postId) {
             const contentEl = document.getElementById(`post-content-${postId}`);
             if (!contentEl) return;
-            const truncated = contentEl.querySelector('.post-content-truncated');
-            const full = contentEl.querySelector('.post-content-full');
-            const seeMore = contentEl.querySelector('.post-card__see-more');
-            if (truncated) truncated.style.display = 'none';
-            if (seeMore) seeMore.style.display = 'none';
-            if (full) full.style.display = 'inline';
+
+            const isExpanded = contentEl.classList.contains('post-card__content--expanded');
+            const card = contentEl.closest('.post-card');
+            const seeMoreBtn = card ? card.querySelector(`.post-card__see-more[data-post-id="${postId}"]`) : null;
+
+            if (isExpanded) {
+                contentEl.classList.remove('post-card__content--expanded');
+                contentEl.classList.add('post-card__content--truncated');
+                if (seeMoreBtn) seeMoreBtn.textContent = '...See more';
+            } else {
+                contentEl.classList.remove('post-card__content--truncated');
+                contentEl.classList.add('post-card__content--expanded');
+                if (seeMoreBtn) seeMoreBtn.textContent = 'See less';
+            }
         }
 
 
@@ -2075,21 +2259,31 @@
             // Close any other open dropdowns first
             closeAllDropdowns();
 
+            // Check if this is the user's own post
+            const card = document.getElementById(`post-card-${postId}`);
+            const postAuthorLink = card ? card.querySelector('.post-card__author-name') : null;
+            const postAuthorUsername = postAuthorLink ? postAuthorLink.getAttribute('href')?.split('username=')[1] : null;
+            const isOwnPost = currentUser && postAuthorUsername === currentUser.username;
+
+            const isSaved = savedPostIds.has(postId);
+
             container.innerHTML = `
                 <div class="post-card__dropdown" id="post-dropdown-menu-${postId}">
                     <button class="post-card__dropdown-item" data-action="save-post" data-post-id="${postId}">
-                        <span class="post-card__dropdown-icon">🔖</span>
-                        Save post
+                        <span class="post-card__dropdown-icon">${isSaved ? '❌' : '🔖'}</span>
+                        ${isSaved ? 'Unsave post' : 'Save post'}
                     </button>
                     <button class="post-card__dropdown-item" data-action="copy-link" data-post-id="${postId}">
                         <span class="post-card__dropdown-icon">🔗</span>
                         Copy link
                     </button>
+                    ${isOwnPost ? `
                     <div class="post-card__dropdown-divider"></div>
                     <button class="post-card__dropdown-item post-card__dropdown-item--danger" data-action="delete-post" data-post-id="${postId}">
                         <span class="post-card__dropdown-icon">🗑️</span>
                         Delete post
                     </button>
+                    ` : ''}
                 </div>
             `;
 
@@ -2143,9 +2337,20 @@
             document.removeEventListener('click', handleOutsideDropdownClick);
         }
 
-        function handleSavePost(postId) {
+        async function handleSavePost(postId) {
             closeAllDropdowns();
-            window.app.showToast('Post saved! (Coming soon)', 'info');
+            try {
+                const result = await window.api.post(`/posts/${postId}/save/`);
+                if (result.saved) {
+                    savedPostIds.add(postId);
+                    window.app.showToast('Post saved!', 'success');
+                } else {
+                    savedPostIds.delete(postId);
+                    window.app.showToast('Post removed from saved.', 'info');
+                }
+            } catch (err) {
+                window.app.showToast('Failed to save post.', 'error');
+            }
         }
 
         function handleCopyLink(postId) {
@@ -2248,7 +2453,7 @@
             const avatarSrc = author.avatar || window.app.getInitialsAvatar(author.username || 'U', 32);
             const displayName = `${author.first_name || ''} ${author.last_name || ''}`.trim() || author.username || 'User';
             const headline = author.headline || '';
-            const timeAgo = comment.time_ago || window.app.timeAgo(comment.created_at);
+            const timeAgo = comment.time_ago || window.app.formatTimeAgo(comment.created_at);
             const isOwn = currentUser && author.id === currentUser.id;
 
             return `
@@ -2409,6 +2614,7 @@
                     btn.classList.remove('btn-secondary', 'btn-secondary--sm');
                     btn.classList.add('btn-primary', 'btn-primary--sm');
                     btn.dataset.following = 'true';
+                    window.app.addNotification(`You followed ${username}`, '👥');
                 } else {
                     btn.textContent = 'Follow';
                     btn.classList.remove('btn-primary', 'btn-primary--sm');

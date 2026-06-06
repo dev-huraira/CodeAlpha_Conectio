@@ -50,3 +50,19 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.author.username} on post #{self.post.id}: {self.content[:50]}"
+
+
+class SavedPost(models.Model):
+    """A saved/bookmarked post."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='saved_posts'
+    )
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='saved_by')
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'post')
+        ordering = ['-saved_at']
+
+    def __str__(self):
+        return f"{self.user.username} saved post #{self.post.id}"

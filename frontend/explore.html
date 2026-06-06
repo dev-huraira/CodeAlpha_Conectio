@@ -375,7 +375,7 @@
         }
 
         .post-card:hover {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 0 0 2px var(--color-border);
         }
 
         .post-card__header {
@@ -440,6 +440,12 @@
             max-height: 512px;
             object-fit: cover;
             display: block;
+            cursor: pointer;
+            transition: opacity var(--transition-fast);
+        }
+
+        .post-card__image:hover {
+            opacity: 0.95;
         }
 
         .post-card__stats {
@@ -660,8 +666,26 @@
     <div class="navbar-spacer"></div>
 
 
+    <!-- ═══════════════ AUTH REQUIRED ═══════════════ -->
+    <div id="explore-auth-required" style="display: none;">
+        <div style="max-width: 480px; margin: var(--space-2xl) auto; padding: 0 var(--space-base);">
+            <div class="card-shadow text-center" style="padding: 48px;">
+                <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:24px;">
+                    <div style="width:40px;height:40px;border-radius:8px;background:var(--color-primary);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;">C</div>
+                    <span style="font-size:24px;font-weight:700;color:var(--color-primary);letter-spacing:-0.5px;">Conectio</span>
+                </div>
+                <h2 style="margin-bottom: 8px;">Sign in to explore Conectio</h2>
+                <p class="text-muted" style="margin-bottom: 24px;">Discover trending posts, connect with people, and stay updated.</p>
+                <div style="display:flex;gap:12px;justify-content:center;">
+                    <a href="login.html" class="btn-primary" style="min-width:120px;">Sign in</a>
+                    <a href="register.html" class="btn-secondary" style="min-width:120px;">Join now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ═══════════════ EXPLORE ═══════════════ -->
-    <main>
+    <main id="explore-main">
         <div class="explore-container">
 
             <!-- Header -->
@@ -724,6 +748,12 @@
     <!-- ═══════════════ FOOTER ═══════════════ -->
     <footer class="footer" id="footer">
         <span class="footer__brand">Conectio</span> &copy; 2025 · Connect with purpose.
+        <span style="margin-left:8px;">
+            <a href="about.html" style="color:var(--color-text-secondary);font-size:12px;">About</a> ·
+            <a href="help.html" style="color:var(--color-text-secondary);font-size:12px;">Help</a> ·
+            <a href="privacy.html" style="color:var(--color-text-secondary);font-size:12px;">Privacy</a> ·
+            <a href="terms.html" style="color:var(--color-text-secondary);font-size:12px;">Terms</a>
+        </span>
     </footer>
 
 
@@ -770,13 +800,18 @@
            INIT
            ══════════════════════════════════════════ */
         document.addEventListener('DOMContentLoaded', async () => {
+            // Auth gate — if not logged in, show sign-in card and stop
+            if (!window.auth.isLoggedIn()) {
+                document.getElementById('explore-main').style.display = 'none';
+                document.getElementById('explore-auth-required').style.display = 'block';
+                return;
+            }
+
             // Load current user
-            if (window.auth.isLoggedIn()) {
-                try {
-                    currentUser = await window.api.get('/users/me/');
-                } catch (e) {
-                    currentUser = window.auth.getCurrentUser();
-                }
+            try {
+                currentUser = await window.api.get('/users/me/');
+            } catch (e) {
+                currentUser = window.auth.getCurrentUser();
             }
 
             setupSearch();
@@ -1218,7 +1253,7 @@
             const avatarSrc = author.avatar || window.app.getInitialsAvatar(author.username || 'U', 48);
             const displayName = `${author.first_name || ''} ${author.last_name || ''}`.trim() || author.username || 'User';
             const headline = author.headline || '';
-            const timeAgo = post.time_ago || window.app.timeAgo(post.created_at);
+            const timeAgo = post.time_ago || window.app.formatTimeAgo(post.created_at);
             const content = post.content || '';
             const isLiked = post.is_liked || false;
             const likesCount = post.likes_count || 0;
@@ -1235,7 +1270,7 @@
             let imageHtml = '';
             if (post.image) {
                 const imgUrl = post.image.startsWith('http') ? post.image : `${window.api.BASE.replace('/api', '')}${post.image}`;
-                imageHtml = `<img class="post-card__image" src="${imgUrl}" alt="Post image" loading="lazy">`;
+                imageHtml = `<img class="post-card__image" src="${imgUrl}" alt="Post image" loading="lazy" onclick="window.app.openLightbox('${imgUrl}')">`;
             }
 
             return `
@@ -1255,7 +1290,7 @@
                     <span class="post-card__stats-likes">
                         ${likesCount > 0 ? `<span style="font-size:14px;">👍</span> <span id="likes-count-${post.id}">${likesCount}</span>` : `<span id="likes-count-${post.id}">0</span>`}
                     </span>
-                    <span>${commentsCount} comment${commentsCount !== 1 ? 's' : ''}</span>
+                    <span style="cursor:pointer;" onclick="window.location.href='index.html?post=${post.id}'">${commentsCount} comment${commentsCount !== 1 ? 's' : ''}</span>
                 </div>
                 <div class="post-card__actions">
                     <button class="post-card__action-btn ${isLiked ? 'post-card__action-btn--active' : ''}"
@@ -1368,6 +1403,10 @@
                 btn.className = `post-card__action-btn ${result.liked ? 'post-card__action-btn--active' : ''}`;
                 if (labelEl) labelEl.textContent = result.liked ? 'Liked' : 'Like';
                 if (countEl) countEl.textContent = result.likes_count;
+
+                if (result.liked) {
+                    window.app.addNotification('You liked a post', '👍');
+                }
             } catch (err) {
                 btn.dataset.liked = String(wasLiked);
                 btn.className = `post-card__action-btn ${wasLiked ? 'post-card__action-btn--active' : ''}`;

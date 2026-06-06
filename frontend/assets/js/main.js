@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Setup dropdown menus
     setupDropdowns();
+
+    // Setup notification bell
+    setupNotificationBell();
 });
 
 
@@ -34,6 +37,7 @@ function renderNavbar() {
     if (loggedIn && user) {
         const displayName = user.first_name || user.username || 'Me';
         const initial = displayName.charAt(0).toUpperCase();
+        const unreadCount = getUnreadNotificationCount();
 
         navLinks.innerHTML = `
             <a href="index.html" class="navbar__link ${currentPage === 'index.html' ? 'navbar__link--active' : ''}" id="nav-home">
@@ -48,6 +52,20 @@ function renderNavbar() {
                 <span class="navbar__link-icon">🔍</span>
                 <span class="navbar__link-label">Explore</span>
             </a>
+
+            <!-- Notification Bell -->
+            <div class="navbar__link notification-bell" id="notification-bell" tabindex="0" role="button" aria-label="Notifications">
+                <span class="navbar__link-icon">🔔</span>
+                <span class="navbar__link-label">Alerts</span>
+                ${unreadCount > 0 ? '<span class="notification-dot" id="notification-dot"></span>' : ''}
+                <div class="notification-dropdown" id="notification-dropdown">
+                    <div class="notification-dropdown__header">
+                        Notifications
+                        <button class="notification-dropdown__clear" id="notification-clear-btn">Clear all</button>
+                    </div>
+                    <div class="notification-dropdown__list" id="notification-list"></div>
+                </div>
+            </div>
 
             <!-- User menu -->
             <div class="dropdown" id="nav-user-dropdown">
@@ -216,28 +234,47 @@ document.head.appendChild(toastStyles);
 
 
 /* ── Time Formatting ───────────────────────── */
-function timeAgo(dateString) {
+
+/**
+ * Formats a date string into a human-readable relative time.
+ * - < 60 seconds: "Just now"
+ * - < 60 minutes: "Xm ago"
+ * - < 24 hours: "Xh ago"
+ * - < 7 days: "Xd ago"
+ * - >= 7 days: "Jan 15" or "Jan 15, 2024" if different year
+ *
+ * @param {string} dateString - ISO date string
+ * @returns {string}
+ */
+function formatTimeAgo(dateString) {
+    if (!dateString) return '';
+
     const now = new Date();
     const date = new Date(dateString);
     const seconds = Math.floor((now - date) / 1000);
 
-    const intervals = [
-        { label: 'y', seconds: 31536000 },
-        { label: 'mo', seconds: 2592000 },
-        { label: 'w', seconds: 604800 },
-        { label: 'd', seconds: 86400 },
-        { label: 'h', seconds: 3600 },
-        { label: 'm', seconds: 60 },
-    ];
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
 
-    for (const interval of intervals) {
-        const count = Math.floor(seconds / interval.seconds);
-        if (count >= 1) {
-            return `${count}${interval.label}`;
-        }
+    // >= 7 days: show date
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[date.getMonth()];
+    const day = date.getDate();
+
+    if (date.getFullYear() !== now.getFullYear()) {
+        return `${month} ${day}, ${date.getFullYear()}`;
     }
+    return `${month} ${day}`;
+}
 
-    return 'now';
+/**
+ * Legacy alias for backward compatibility.
+ */
+function timeAgo(dateString) {
+    return formatTimeAgo(dateString);
 }
 
 
@@ -276,12 +313,316 @@ function escapeHtml(text) {
 }
 
 
+/* ── Image Lightbox ────────────────────────── */
+
+/**
+ * Opens a full-screen lightbox overlay with the given image URL.
+ * Press Escape, click the × button, or click the overlay to close.
+ *
+ * @param {string} imageUrl - The URL of the image to display
+ */
+function openLightbox(imageUrl) {
+    // Prevent duplicates
+    const existing = document.getElementById('lightbox-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'lightbox-overlay';
+    overlay.className = 'lightbox-overlay';
+
+    overlay.innerHTML = `
+        <button class="lightbox-close" aria-label="Close lightbox">&times;</button>
+        <img class="lightbox-image" src="${imageUrl}" alt="Full size image">
+    `;
+
+    // Close on overlay click (but not on image click)
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeLightbox();
+    });
+
+    // Close button
+    overlay.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
+
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    // Escape key
+    document.addEventListener('keydown', lightboxEscapeHandler);
+}
+
+function closeLightbox() {
+    const overlay = document.getElementById('lightbox-overlay');
+    if (overlay) {
+        overlay.style.animation = 'fadeOut 150ms ease forwards';
+        setTimeout(() => {
+            overlay.remove();
+            document.body.style.overflow = '';
+        }, 150);
+    }
+    document.removeEventListener('keydown', lightboxEscapeHandler);
+}
+
+function lightboxEscapeHandler(e) {
+    if (e.key === 'Escape') closeLightbox();
+}
+
+
+/* ── Notification System ───────────────────── */
+const NOTIFICATION_KEY = 'conectio_notifications';
+const NOTIFICATION_READ_KEY = 'conectio_notifications_read';
+const MAX_NOTIFICATIONS = 20;
+
+/**
+ * Add a notification message to localStorage.
+ * @param {string} message - e.g. "You liked John's post"
+ * @param {string} icon - emoji icon (default: "🔔")
+ */
+function addNotification(message, icon = '🔔') {
+    const notifications = getNotifications();
+    notifications.unshift({
+        message,
+        icon,
+        time: new Date().toISOString(),
+    });
+
+    // Keep only last N
+    if (notifications.length > MAX_NOTIFICATIONS) {
+        notifications.length = MAX_NOTIFICATIONS;
+    }
+
+    localStorage.setItem(NOTIFICATION_KEY, JSON.stringify(notifications));
+    localStorage.setItem(NOTIFICATION_READ_KEY, 'false');
+
+    // Update the bell dot
+    updateNotificationDot();
+    // Update dropdown contents if open
+    renderNotificationList();
+}
+
+/**
+ * Get all notifications from localStorage.
+ * @returns {Array<{message: string, icon: string, time: string}>}
+ */
+function getNotifications() {
+    try {
+        return JSON.parse(localStorage.getItem(NOTIFICATION_KEY)) || [];
+    } catch {
+        return [];
+    }
+}
+
+/**
+ * Clear all notifications.
+ */
+function clearNotifications() {
+    localStorage.setItem(NOTIFICATION_KEY, JSON.stringify([]));
+    localStorage.setItem(NOTIFICATION_READ_KEY, 'true');
+    updateNotificationDot();
+    renderNotificationList();
+}
+
+/**
+ * Get count of unread notifications.
+ */
+function getUnreadNotificationCount() {
+    const isRead = localStorage.getItem(NOTIFICATION_READ_KEY);
+    if (isRead === 'true') return 0;
+    return getNotifications().length;
+}
+
+/**
+ * Mark notifications as read.
+ */
+function markNotificationsRead() {
+    localStorage.setItem(NOTIFICATION_READ_KEY, 'true');
+    updateNotificationDot();
+}
+
+/**
+ * Update the red dot visibility on the bell icon.
+ */
+function updateNotificationDot() {
+    const dot = document.getElementById('notification-dot');
+    const count = getUnreadNotificationCount();
+
+    if (count > 0 && !dot) {
+        // Add dot
+        const bell = document.getElementById('notification-bell');
+        if (bell) {
+            const newDot = document.createElement('span');
+            newDot.className = 'notification-dot';
+            newDot.id = 'notification-dot';
+            bell.appendChild(newDot);
+        }
+    } else if (count === 0 && dot) {
+        dot.remove();
+    }
+}
+
+/**
+ * Render the notification list inside the dropdown.
+ */
+function renderNotificationList() {
+    const list = document.getElementById('notification-list');
+    if (!list) return;
+
+    const notifications = getNotifications();
+
+    if (notifications.length === 0) {
+        list.innerHTML = '<div class="notification-dropdown__empty">No notifications yet</div>';
+        return;
+    }
+
+    list.innerHTML = notifications.slice(0, 5).map(n => `
+        <div class="notification-dropdown__item">
+            <span class="notification-dropdown__item-icon">${n.icon}</span>
+            <div>
+                <div>${escapeHtml(n.message)}</div>
+                <div class="notification-dropdown__item-time">${formatTimeAgo(n.time)}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+/**
+ * Setup notification bell click behavior.
+ */
+function setupNotificationBell() {
+    // Use event delegation since bell is rendered dynamically
+    document.addEventListener('click', (e) => {
+        const bell = e.target.closest('#notification-bell');
+        const dropdown = document.getElementById('notification-dropdown');
+
+        if (bell && dropdown) {
+            // Don't toggle if clicking clear button
+            if (e.target.closest('#notification-clear-btn')) {
+                clearNotifications();
+                return;
+            }
+
+            const isOpen = dropdown.classList.contains('notification-dropdown--open');
+            dropdown.classList.toggle('notification-dropdown--open');
+
+            if (!isOpen) {
+                // Opening — mark as read and render list
+                markNotificationsRead();
+                renderNotificationList();
+            }
+        } else if (dropdown && !e.target.closest('#notification-dropdown')) {
+            // Clicking outside — close
+            dropdown.classList.remove('notification-dropdown--open');
+        }
+    });
+}
+
+
+/* ── Password Strength ─────────────────────── */
+
+/**
+ * Calculate password strength: weak, medium, or strong.
+ * @param {string} password
+ * @returns {'weak'|'medium'|'strong'}
+ */
+function getPasswordStrength(password) {
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+    if (/\d/.test(password)) score++;
+    if (/[^a-zA-Z0-9]/.test(password)) score++;
+
+    if (score <= 2) return 'weak';
+    if (score <= 3) return 'medium';
+    return 'strong';
+}
+
+
+/* ── Form Validation Helpers ───────────────── */
+
+/**
+ * Validate a username: letters, numbers, underscores, 3-30 chars.
+ * @param {string} value
+ * @returns {string|null} error message or null if valid
+ */
+function validateUsername(value) {
+    if (!value) return 'Username is required.';
+    if (value.length < 3) return 'Username must be at least 3 characters.';
+    if (value.length > 30) return 'Username must be 30 characters or fewer.';
+    if (!/^[a-zA-Z0-9_]+$/.test(value)) return 'Only letters, numbers, and underscores allowed.';
+    return null;
+}
+
+/**
+ * Validate an email address.
+ * @param {string} value
+ * @returns {string|null} error message or null if valid
+ */
+function validateEmail(value) {
+    if (!value) return 'Email is required.';
+    // Must contain @ and valid TLD
+    if (!/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(value)) return 'Please enter a valid email address.';
+    return null;
+}
+
+/**
+ * Validate a password.
+ * @param {string} value
+ * @returns {string|null} error message or null if valid
+ */
+function validatePassword(value) {
+    if (!value) return 'Password is required.';
+    if (value.length < 8) return 'Password must be at least 8 characters.';
+    return null;
+}
+
+/**
+ * Show or clear inline field validation.
+ * @param {string} inputId - The input element ID
+ * @param {string|null} error - Error message or null if valid
+ */
+function setFieldValidation(inputId, error) {
+    const input = document.getElementById(inputId);
+    const errorEl = document.getElementById(inputId + '-error');
+    if (!input) return;
+
+    if (error) {
+        input.classList.add('input-field--error');
+        input.classList.remove('input-field--success');
+        if (errorEl) {
+            errorEl.textContent = error;
+            errorEl.style.display = 'block';
+        }
+    } else if (input.value.trim()) {
+        input.classList.remove('input-field--error');
+        input.classList.add('input-field--success');
+        if (errorEl) {
+            errorEl.style.display = 'none';
+        }
+    } else {
+        input.classList.remove('input-field--error', 'input-field--success');
+        if (errorEl) {
+            errorEl.style.display = 'none';
+        }
+    }
+}
+
+
 /* ── Export utilities ──────────────────────── */
 window.app = {
     renderNavbar,
     showToast,
     timeAgo,
+    formatTimeAgo,
     getInitialsAvatar,
     escapeHtml,
+    openLightbox,
+    closeLightbox,
+    addNotification,
+    getNotifications,
+    clearNotifications,
+    getPasswordStrength,
+    validateUsername,
+    validateEmail,
+    validatePassword,
+    setFieldValidation,
 };
-

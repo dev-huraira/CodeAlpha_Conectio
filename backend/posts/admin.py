@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Post, Like, Comment
+from .models import Post, Like, Comment, SavedPost
 
 
 @admin.register(Post)
@@ -18,3 +18,8 @@ class LikeAdmin(admin.ModelAdmin):
 class CommentAdmin(admin.ModelAdmin):
     list_display = ['author', 'post', 'content', 'created_at']
     search_fields = ['author__username', 'content']
+
+
+@admin.register(SavedPost)
+class SavedPostAdmin(admin.ModelAdmin):
+    list_display = ['user', 'post', 'saved_at']

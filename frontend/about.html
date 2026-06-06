@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="About Conectio — Connect with purpose. Learn about our mission, features, and story.">
+    <title>About — Conectio</title>
+
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230A66C2'/><text x='16' y='23' font-family='Arial' font-size='20' font-weight='bold' fill='white' text-anchor='middle'>C</text></svg>">
+
+    <style>
+        .static-page {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: var(--space-xl) var(--space-base) var(--space-2xl);
+        }
+        .static-page__hero {
+            text-align: center;
+            padding: var(--space-2xl) 0 var(--space-xl);
+        }
+        .static-page__logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: var(--space-md);
+        }
+        .static-page__logo-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 24px;
+        }
+        .static-page__logo-text {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--color-primary);
+            letter-spacing: -0.5px;
+        }
+        .static-page__tagline {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-bottom: var(--space-sm);
+        }
+        .static-page__subtitle {
+            font-size: var(--font-size-md);
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+        .static-section {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        .static-section__title {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .static-section__title-icon {
+            font-size: 24px;
+        }
+        .static-section p {
+            font-size: var(--font-size-base);
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+            margin-bottom: var(--space-md);
+        }
+        .static-section p:last-child {
+            margin-bottom: 0;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--space-md);
+            margin-top: var(--space-md);
+        }
+        .feature-item {
+            padding: var(--space-base);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+        }
+        .feature-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+        .feature-item__icon {
+            font-size: 28px;
+            margin-bottom: var(--space-sm);
+        }
+        .feature-item__name {
+            font-weight: 600;
+            font-size: var(--font-size-base);
+            margin-bottom: 4px;
+        }
+        .feature-item__desc {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════════ NAVBAR ═══════════════ -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="navbar__inner">
+            <a href="index.html" class="navbar__logo" id="navbar-logo">
+                <div class="navbar__logo-icon">C</div>
+                Conectio
+            </a>
+            <div class="navbar__links" id="navbar-links"></div>
+        </div>
+    </nav>
+    <div class="navbar-spacer"></div>
+
+
+    <!-- ═══════════════ CONTENT ═══════════════ -->
+    <main class="static-page">
+
+        <div class="static-page__hero">
+            <div class="static-page__logo">
+                <div class="static-page__logo-icon">C</div>
+                <span class="static-page__logo-text">Conectio</span>
+            </div>
+            <h1 class="static-page__tagline">Connect with purpose.</h1>
+            <p class="static-page__subtitle">
+                Conectio is a professional networking platform built to foster meaningful connections,
+                spark authentic conversations, and help professionals grow together.
+            </p>
+        </div>
+
+        <!-- Mission -->
+        <div class="static-section">
+            <h2 class="static-section__title">
+                <span class="static-section__title-icon">🎯</span>
+                Our Mission
+            </h2>
+            <p>
+                We believe the best professional relationships are built on purpose, not proximity.
+                Conectio was created to give every professional — regardless of geography, industry,
+                or background — a space to share ideas, find mentors, and build a career network
+                that actually matters.
+            </p>
+            <p>
+                Unlike platforms that optimize for engagement metrics, Conectio is designed around
+                genuine human connection. Every feature we build starts with one question:
+                <em>does this help people connect with purpose?</em>
+            </p>
+        </div>
+
+        <!-- Features -->
+        <div class="static-section">
+            <h2 class="static-section__title">
+                <span class="static-section__title-icon">✨</span>
+                What You Can Do
+            </h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-item__icon">📝</div>
+                    <div class="feature-item__name">Share Updates</div>
+                    <div class="feature-item__desc">Post text and images to share your journey, insights, and wins with your network.</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item__icon">👥</div>
+                    <div class="feature-item__name">Build Your Network</div>
+                    <div class="feature-item__desc">Follow professionals who inspire you. Get followed by people who value your perspective.</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item__icon">🔍</div>
+                    <div class="feature-item__name">Explore &amp; Discover</div>
+                    <div class="feature-item__desc">Search for people and trending content. Find conversations that matter to you.</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item__icon">💬</div>
+                    <div class="feature-item__name">Engage Authentically</div>
+                    <div class="feature-item__desc">Like, comment, and save posts. Every interaction is a chance to connect.</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item__icon">🖼️</div>
+                    <div class="feature-item__name">Rich Profiles</div>
+                    <div class="feature-item__desc">Customize your avatar, banner, headline, and bio. Make your profile truly yours.</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item__icon">🔖</div>
+                    <div class="feature-item__name">Save for Later</div>
+                    <div class="feature-item__desc">Bookmark posts that resonate with you and revisit them anytime from your profile.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Story -->
+        <div class="static-section">
+            <h2 class="static-section__title">
+                <span class="static-section__title-icon">📖</span>
+                Our Story
+            </h2>
+            <p>
+                Conectio started in 2025 as a side project by a small team of developers who were
+                tired of noisy social platforms that prioritized vanity over value. We wanted a
+                clean, focused space where professionals could share what they're working on,
+                learn from each other, and build relationships that go beyond a connection request.
+            </p>
+            <p>
+                We built Conectio with Django and vanilla JavaScript — no heavy frameworks,
+                no unnecessary complexity. Just a fast, accessible platform that does what it
+                says: helps you connect with purpose.
+            </p>
+            <p>
+                Today, Conectio continues to evolve with features shaped by our community.
+                We're committed to keeping the platform clean, respectful, and genuinely useful
+                for the people who use it.
+            </p>
+        </div>
+
+    </main>
+
+
+    <!-- ═══════════════ FOOTER ═══════════════ -->
+    <footer class="footer" id="footer">
+        <span class="footer__brand">Conectio</span> &copy; 2025 · Connect with purpose.
+        <span style="margin-left:8px;">
+            <a href="about.html" style="color:var(--color-text-secondary);font-size:12px;">About</a> ·
+            <a href="help.html" style="color:var(--color-text-secondary);font-size:12px;">Help</a> ·
+            <a href="privacy.html" style="color:var(--color-text-secondary);font-size:12px;">Privacy</a> ·
+            <a href="terms.html" style="color:var(--color-text-secondary);font-size:12px;">Terms</a>
+        </span>
+    </footer>
+
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>

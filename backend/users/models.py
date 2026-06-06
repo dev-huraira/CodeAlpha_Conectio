@@ -6,6 +6,7 @@ class User(AbstractUser):
     """Custom user model for Conectio with profile fields built in."""
     bio = models.TextField(blank=True, max_length=300)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    banner = models.ImageField(upload_to='banners/', blank=True, null=True)
     headline = models.CharField(max_length=120, blank=True)
     website = models.URLField(blank=True)
     followers_count = models.IntegerField(default=0)

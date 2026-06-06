@@ -150,6 +150,12 @@
     <!-- ═══════════════ FOOTER ═══════════════ -->
     <footer class="footer" id="footer">
         <span class="footer__brand">Conectio</span> &copy; 2025 · Connect with purpose.
+        <span style="margin-left:8px;">
+            <a href="about.html" style="color:var(--color-text-secondary);font-size:12px;">About</a> ·
+            <a href="help.html" style="color:var(--color-text-secondary);font-size:12px;">Help</a> ·
+            <a href="privacy.html" style="color:var(--color-text-secondary);font-size:12px;">Privacy</a> ·
+            <a href="terms.html" style="color:var(--color-text-secondary);font-size:12px;">Terms</a>
+        </span>
     </footer>
 
 
@@ -233,6 +239,19 @@
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = 'Sign in';
+            }
+        });
+
+        // ── Real-time email validation ──
+        document.getElementById('login-email').addEventListener('input', function() {
+            const val = this.value.trim();
+            if (!val) {
+                this.classList.remove('input-field--success', 'input-field--error');
+                const errEl = document.getElementById('login-email-error');
+                if (errEl) errEl.style.display = 'none';
+            } else {
+                const error = window.app.validateEmail(val);
+                window.app.setFieldValidation('login-email', error);
             }
         });
     </script>

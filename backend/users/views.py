@@ -4,6 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
+from django.utils.decorators import method_decorator
+from django_ratelimit.decorators import ratelimit
 
 from .models import Connection
 from .serializers import (
@@ -15,6 +17,7 @@ from .serializers import (
     UserFollowSerializer,
     UpdateProfileSerializer,
     AvatarUploadSerializer,
+    BannerUploadSerializer,
 )
 
 User = get_user_model()
@@ -25,6 +28,7 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = UserRegisterSerializer
     permission_classes = [permissions.AllowAny]
 
+    @method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True))
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -51,6 +55,7 @@ class LoginView(APIView):
     """POST /api/users/login/ — Authenticate with email + password, return JWT."""
     permission_classes = [permissions.AllowAny]
 
+    @method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True))
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -240,6 +245,30 @@ class AvatarUploadView(APIView):
         return Response({
             'avatar': avatar_url,
             'message': 'Avatar uploaded successfully.',
+        })
+
+
+class BannerUploadView(APIView):
+    """PATCH /api/users/me/banner/ — Upload banner image."""
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def patch(self, request):
+        serializer = BannerUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        banner_file = serializer.validated_data['banner']
+        user = request.user
+        # Delete old banner file if exists
+        if user.banner:
+            user.banner.delete(save=False)
+        user.banner = banner_file
+        user.save(update_fields=['banner'])
+
+        banner_url = request.build_absolute_uri(user.banner.url)
+        return Response({
+            'banner': banner_url,
+            'message': 'Banner uploaded successfully.',
         })
 
 

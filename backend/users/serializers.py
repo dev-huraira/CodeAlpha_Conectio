@@ -54,7 +54,7 @@ class UserPublicSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
-            'full_name', 'bio', 'avatar', 'headline',
+            'full_name', 'bio', 'avatar', 'banner', 'headline',
             'followers_count', 'following_count', 'posts_count',
             'date_joined', 'is_following',
         ]
@@ -88,6 +88,7 @@ class UserMinimalSerializer(serializers.ModelSerializer):
 
 class UpdateProfileSerializer(serializers.ModelSerializer):
     """Serializer for updating user profile fields."""
+    website = serializers.CharField(max_length=200, required=False, allow_blank=True)
 
     class Meta:
         model = User
@@ -103,6 +104,11 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Headline must be 120 characters or fewer.')
         return value
 
+    def validate_website(self, value):
+        if value and not value.startswith('http://') and not value.startswith('https://'):
+            value = 'https://' + value
+        return value
+
 
 class AvatarUploadSerializer(serializers.Serializer):
     """Serializer for avatar file upload validation."""
@@ -112,6 +118,17 @@ class AvatarUploadSerializer(serializers.Serializer):
         # Max 5MB
         if value.size > 5 * 1024 * 1024:
             raise serializers.ValidationError('Avatar file size must be under 5MB.')
+        return value
+
+
+class BannerUploadSerializer(serializers.Serializer):
+    """Serializer for banner file upload validation."""
+    banner = serializers.ImageField()
+
+    def validate_banner(self, value):
+        # Max 5MB
+        if value.size > 5 * 1024 * 1024:
+            raise serializers.ValidationError('Banner file size must be under 5MB.')
         return value
 
 

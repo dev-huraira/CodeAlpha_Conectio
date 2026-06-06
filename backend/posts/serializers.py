@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from .models import Post, Like, Comment
+from .models import Post, Like, Comment, SavedPost
 from users.serializers import UserMinimalSerializer
 
 
@@ -53,13 +53,14 @@ class PostSerializer(serializers.ModelSerializer):
     likes_count = serializers.ReadOnlyField()
     comments_count = serializers.ReadOnlyField()
     is_liked = serializers.SerializerMethodField()
+    is_saved = serializers.SerializerMethodField()
     time_ago = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
             'id', 'author', 'content', 'image',
-            'likes_count', 'comments_count', 'is_liked',
+            'likes_count', 'comments_count', 'is_liked', 'is_saved',
             'created_at', 'updated_at', 'time_ago',
         ]
         read_only_fields = ['author']
@@ -68,6 +69,12 @@ class PostSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
             return obj.likes.filter(user=request.user).exists()
+        return False
+
+    def get_is_saved(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return SavedPost.objects.filter(user=request.user, post=obj).exists()
         return False
 
     def get_time_ago(self, obj):

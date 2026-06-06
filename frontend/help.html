@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Conectio Help Center — Find answers to common questions about using Conectio.">
+    <title>Help Center — Conectio</title>
+
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230A66C2'/><text x='16' y='23' font-family='Arial' font-size='20' font-weight='bold' fill='white' text-anchor='middle'>C</text></svg>">
+
+    <style>
+        .static-page {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: var(--space-xl) var(--space-base) var(--space-2xl);
+        }
+        .static-page__hero {
+            text-align: center;
+            padding: var(--space-xl) 0 var(--space-lg);
+        }
+        .static-page__tagline {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .static-page__subtitle {
+            font-size: var(--font-size-md);
+            color: var(--color-text-secondary);
+        }
+        .faq-item {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-sm);
+            overflow: hidden;
+            transition: box-shadow var(--transition-fast);
+        }
+        .faq-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .faq-question {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-base) var(--space-lg);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            color: var(--color-text-primary);
+            text-align: left;
+            line-height: 1.5;
+            gap: var(--space-md);
+            font-family: inherit;
+        }
+        .faq-question:hover {
+            background: var(--color-bg-hover);
+        }
+        .faq-question__icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .faq-question__chevron {
+            font-size: 18px;
+            flex-shrink: 0;
+            transition: transform 300ms ease;
+            color: var(--color-text-secondary);
+        }
+        .faq-item--open .faq-question__chevron {
+            transform: rotate(180deg);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 300ms ease, padding 300ms ease;
+        }
+        .faq-item--open .faq-answer {
+            max-height: 500px;
+        }
+        .faq-answer__inner {
+            padding: 0 var(--space-lg) var(--space-lg);
+            font-size: var(--font-size-base);
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+        .faq-category {
+            font-size: var(--font-size-md);
+            font-weight: 700;
+            margin: var(--space-xl) 0 var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .faq-category__icon {
+            font-size: 22px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════════ NAVBAR ═══════════════ -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="navbar__inner">
+            <a href="index.html" class="navbar__logo" id="navbar-logo">
+                <div class="navbar__logo-icon">C</div>
+                Conectio
+            </a>
+            <div class="navbar__links" id="navbar-links"></div>
+        </div>
+    </nav>
+    <div class="navbar-spacer"></div>
+
+
+    <!-- ═══════════════ CONTENT ═══════════════ -->
+    <main class="static-page">
+
+        <div class="static-page__hero">
+            <h1 class="static-page__tagline">❓ Help Center</h1>
+            <p class="static-page__subtitle">Find answers to the most common questions about Conectio.</p>
+        </div>
+
+        <!-- Getting Started -->
+        <h2 class="faq-category">
+            <span class="faq-category__icon">🚀</span>
+            Getting Started
+        </h2>
+
+        <div class="faq-item" id="faq-1">
+            <button class="faq-question" onclick="toggleFaq('faq-1')">
+                <span><span class="faq-question__icon">📝</span> How do I create an account?</span>
+                <span class="faq-question__chevron">▾</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer__inner">
+                    Click <strong>"Join now"</strong> on the homepage or visit the
+                    <a href="register.html">registration page</a>. Enter your first name, last name,
+                    username, email, and a password (8+ characters). Click "Agree &amp; Join" and you'll
+                    be automatically logged in and redirected to your feed.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" id="faq-2">
+            <button class="faq-question" onclick="toggleFaq('faq-2')">
+                <span><span class="faq-question__icon">🔑</span> How do I sign in?</span>
+                <span class="faq-question__chevron">▾</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer__inner">
+                    Go to the <a href="login.html">sign-in page</a> and enter the email and password
+                    you used during registration. If you've forgotten your password, the password
+                    reset feature will be available soon.
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile -->
+        <h2 class="faq-category">
+            <span class="faq-category__icon">👤</span>
+            Your Profile
+        </h2>
+
+        <div class="faq-item" id="faq-3">
+            <button class="faq-question" onclick="toggleFaq('faq-3')">
+                <span><span class="faq-question__icon">✏️</span> How do I edit my profile?</span>
+                <span class="faq-question__chevron">▾</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer__inner">
+                    Go to your <a href="profile.html">profile page</a> and click the
+                    <strong>"Edit profile"</strong> button. You can update your first name, last name,
+                    headline, bio, and website. Click "Save changes" when you're done. Changes are
+                    reflected immediately across the platform.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" id="faq-4">
+            <button class="faq-question" onclick="toggleFaq('faq-4')">
+                <span><span class="faq-question__icon">🖼️</span> How do I change my avatar or banner?</span>
+                <span class="faq-question__chevron">▾</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer__inner">
+                    On your profile page, click your avatar image to upload a new photo. You can crop
+                    the image before saving. To change your banner, click the banner area at the top
+                    of your profile card. Images must be under 5MB.
+                </div>
+            </div>
+        </div>
+
+        <!-- Posts & Feed -->
+        <h2 class="faq-category">
+            <span class="faq-category__icon">📰</span>
+            Posts &amp; Feed
+        </h2>
+
+        <div class="faq-item" id="faq-5">
+            <button class="faq-question" onclick="toggleFaq('faq-5')">
+                <span><span class="faq-question__icon">💡</span> How do I create a post?</span>
+                <span class="faq-question__chevron">▾</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer__inner">
+                    On the home feed, click the <strong>"Start a post..."</strong> area at the top.
+                    A composer modal will open where you can write your content (up to 3,000 characters)
+                    and optionally attach an image. You can crop images before posting. Click "Post"
+                    to share it with your network.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" id="faq-6">
+            <button class="faq-question" onclick="toggleFaq('faq-6')">
+                <span><span class="faq-question__icon">🔖</span> How do I save a post?</span>
+                <span class="faq-question__chevron">▾</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer__inner">
+                    Click the <strong>⋯</strong> (three dots) menu on any post and select
+                    <strong>"Save post"</strong>. To view your saved posts, go to your profile
+                    and click the <strong>"Saved"</strong> tab. You can also access saved posts
+                    from the sidebar on the home feed. Click "Save post" again to unsave.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" id="faq-7">
+            <button class="faq-question" onclick="toggleFaq('faq-7')">
+                <span><span class="faq-question__icon">🗑️</span> Can I delete my posts?</span>
+                <span class="faq-question__chevron">▾</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer__inner">
+                    Yes. Click the <strong>⋯</strong> menu on your own post, then select
+                    <strong>"Delete post"</strong>. You'll be asked to confirm before the post
+                    is permanently removed. You can only delete posts you authored.
+                </div>
+            </div>
+        </div>
+
+        <!-- Network -->
+        <h2 class="faq-category">
+            <span class="faq-category__icon">🌐</span>
+            Network &amp; Connections
+        </h2>
+
+        <div class="faq-item" id="faq-8">
+            <button class="faq-question" onclick="toggleFaq('faq-8')">
+                <span><span class="faq-question__icon">👥</span> How do I follow someone?</span>
+                <span class="faq-question__chevron">▾</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer__inner">
+                    Visit a user's profile and click the <strong>"Follow"</strong> button.
+                    Their posts will then appear in your personalized feed. You can also follow
+                    users from the "People you may know" suggestions on the home feed or the
+                    Explore page. To unfollow, click the "Following" button on their profile.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" id="faq-9">
+            <button class="faq-question" onclick="toggleFaq('faq-9')">
+                <span><span class="faq-question__icon">🔍</span> How do I find people?</span>
+                <span class="faq-question__chevron">▾</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer__inner">
+                    Use the <strong>search bar</strong> in the navigation bar. You can search by
+                    name, username, or keywords. Results are organized into "People" and "Posts"
+                    tabs. You can also browse the <a href="explore.html">Explore page</a> to
+                    discover trending content and new people.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" id="faq-10">
+            <button class="faq-question" onclick="toggleFaq('faq-10')">
+                <span><span class="faq-question__icon">💬</span> How do I comment on a post?</span>
+                <span class="faq-question__chevron">▾</span>
+            </button>
+            <div class="faq-answer">
+                <div class="faq-answer__inner">
+                    Click the <strong>"Comment"</strong> button below any post. A comment section
+                    will expand with an input field. Type your comment (up to 1,000 characters) and
+                    press Enter or click "Post" to submit. You can delete your own comments at any time.
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+
+    <!-- ═══════════════ FOOTER ═══════════════ -->
+    <footer class="footer" id="footer">
+        <span class="footer__brand">Conectio</span> &copy; 2025 · Connect with purpose.
+        <span style="margin-left:8px;">
+            <a href="about.html" style="color:var(--color-text-secondary);font-size:12px;">About</a> ·
+            <a href="help.html" style="color:var(--color-text-secondary);font-size:12px;">Help</a> ·
+            <a href="privacy.html" style="color:var(--color-text-secondary);font-size:12px;">Privacy</a> ·
+            <a href="terms.html" style="color:var(--color-text-secondary);font-size:12px;">Terms</a>
+        </span>
+    </footer>
+
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/main.js"></script>
+
+    <script>
+        function toggleFaq(id) {
+            const item = document.getElementById(id);
+            if (!item) return;
+            item.classList.toggle('faq-item--open');
+        }
+    </script>
+</body>
+</html>

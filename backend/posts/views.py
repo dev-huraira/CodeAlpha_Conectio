@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from django.db.models import F, Q
-from .models import Post, Like, Comment
+from .models import Post, Like, Comment, SavedPost
 from .serializers import PostSerializer, PostCreateSerializer, CommentSerializer
 from users.models import Connection
 from users.serializers import UserPublicSerializer
@@ -107,6 +107,46 @@ class LikeView(APIView):
             {'liked': True, 'likes_count': post.likes_count},
             status=status.HTTP_201_CREATED,
         )
+
+
+class SavePostView(APIView):
+    """POST /api/posts/<id>/save/ — Toggle save/unsave a post."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            post = Post.objects.get(pk=pk)
+        except Post.DoesNotExist:
+            return Response(
+                {'error': 'Post not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        existing = SavedPost.objects.filter(user=request.user, post=post).first()
+
+        if existing:
+            existing.delete()
+            return Response({'saved': False, 'message': 'Post removed from saved.'})
+
+        SavedPost.objects.create(user=request.user, post=post)
+        return Response(
+            {'saved': True, 'message': 'Post saved.'},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class SavedPostsListView(generics.ListAPIView):
+    """GET /api/users/me/saved/ — List user's saved posts."""
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        saved_post_ids = SavedPost.objects.filter(
+            user=self.request.user
+        ).values_list('post_id', flat=True)
+        return Post.objects.filter(
+            id__in=saved_post_ids
+        ).select_related('author').order_by('-saved_by__saved_at')
 
 
 class CommentListCreateView(generics.ListCreateAPIView):

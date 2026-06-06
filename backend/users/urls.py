@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from posts.views import SavedPostsListView
 
 app_name = 'users'
 
@@ -10,6 +11,8 @@ urlpatterns = [
     path('me/', views.MeView.as_view(), name='me'),
     path('me/update/', views.UpdateProfileView.as_view(), name='update-profile'),
     path('me/avatar/', views.AvatarUploadView.as_view(), name='avatar-upload'),
+    path('me/banner/', views.BannerUploadView.as_view(), name='banner-upload'),
+    path('me/saved/', SavedPostsListView.as_view(), name='saved-posts'),
     path('profile/<str:username>/', views.ProfileDetailView.as_view(), name='profile-detail'),
     path('follow/<str:username>/', views.FollowView.as_view(), name='follow'),
     path('suggested/', views.SuggestedUsersView.as_view(), name='suggested'),

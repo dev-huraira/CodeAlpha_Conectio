@@ -530,3 +530,274 @@
     border-top: 1px solid var(--color-border);
     margin: var(--space-xs) 0;
 }
+
+
+/* ── Card Hover States ─────────────────────── */
+.card:hover,
+.card-shadow:hover {
+    box-shadow: 0 0 0 2px var(--color-border);
+    transition: box-shadow var(--transition-fast);
+}
+
+
+/* ── Avatar Interactions ───────────────────── */
+.avatar {
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+}
+
+.avatar:hover {
+    opacity: 0.9;
+}
+
+
+/* ── Input Success State ───────────────────── */
+.input-field--success {
+    border-color: var(--color-success);
+}
+
+.input-field--success:focus {
+    box-shadow: 0 0 0 3px rgba(5, 118, 66, 0.1);
+}
+
+.form-success {
+    font-size: var(--font-size-sm);
+    color: var(--color-success);
+    margin-top: var(--space-xs);
+}
+
+
+/* ── Image Lightbox ────────────────────────── */
+.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 200ms ease;
+    cursor: zoom-out;
+    padding: var(--space-lg);
+}
+
+.lightbox-image {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+    cursor: default;
+    animation: modalSlideUp 300ms ease;
+}
+
+@keyframes modalSlideUp {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.lightbox-close {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition-fast);
+    z-index: 3001;
+}
+
+.lightbox-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+
+/* ── Notification Bell ─────────────────────── */
+.notification-bell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.notification-dot {
+    position: absolute;
+    top: 0;
+    right: 2px;
+    width: 10px;
+    height: 10px;
+    background: var(--color-error);
+    border-radius: var(--radius-full);
+    border: 2px solid var(--color-bg-card);
+    animation: notifPulse 2s ease-in-out infinite;
+}
+
+@keyframes notifPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+.notification-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: -40px;
+    width: 320px;
+    background: var(--color-bg-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-dropdown);
+    z-index: 200;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
+}
+
+.notification-dropdown--open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.notification-dropdown__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-base);
+    border-bottom: 1px solid var(--color-border);
+    font-weight: 600;
+    font-size: var(--font-size-base);
+}
+
+.notification-dropdown__clear {
+    font-size: var(--font-size-sm);
+    color: var(--color-primary);
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-weight: 600;
+    transition: color var(--transition-fast);
+}
+
+.notification-dropdown__clear:hover {
+    color: var(--color-primary-hover);
+    text-decoration: underline;
+}
+
+.notification-dropdown__list {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.notification-dropdown__item {
+    padding: var(--space-sm) var(--space-base);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    line-height: 1.4;
+}
+
+.notification-dropdown__item:last-child {
+    border-bottom: none;
+}
+
+.notification-dropdown__item-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.notification-dropdown__item-time {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+}
+
+.notification-dropdown__empty {
+    padding: var(--space-lg);
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+
+/* ── Password Strength Indicator ──────────── */
+.password-strength {
+    margin-top: var(--space-sm);
+}
+
+.password-strength__bar-wrap {
+    height: 4px;
+    background: var(--color-border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: var(--space-xs);
+}
+
+.password-strength__bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 300ms ease, background-color 300ms ease;
+    width: 0%;
+}
+
+.password-strength__bar--weak {
+    width: 33%;
+    background: var(--color-error);
+}
+
+.password-strength__bar--medium {
+    width: 66%;
+    background: var(--color-warning);
+}
+
+.password-strength__bar--strong {
+    width: 100%;
+    background: var(--color-success);
+}
+
+.password-strength__label {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.password-strength__label--weak {
+    color: var(--color-error);
+}
+
+.password-strength__label--medium {
+    color: var(--color-warning);
+}
+
+.password-strength__label--strong {
+    color: var(--color-success);
+}
+
+
+/* ── Bio Character Counter ─────────────────── */
+.char-counter {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    text-align: right;
+    margin-top: var(--space-xs);
+    transition: color var(--transition-fast);
+}
+
+.char-counter--warn {
+    color: var(--color-warning);
+}
+
+.char-counter--error {
+    color: var(--color-error);
+}

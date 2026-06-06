@@ -29,6 +29,32 @@
             background: linear-gradient(135deg, #1D4ED8 0%, #0A66C2 40%, #0284C7 100%);
             border-radius: var(--radius-md) var(--radius-md) 0 0;
             position: relative;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .profile-banner--editable {
+            cursor: pointer;
+        }
+
+        .profile-banner--editable:hover .banner-edit-overlay {
+            opacity: 1;
+        }
+
+        .banner-edit-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity 200ms ease;
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
         }
 
         /* ── Profile Card (Left) ───────────────────── */
@@ -612,7 +638,7 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="edit-website">Website</label>
-                        <input type="url" class="input-field" id="edit-website" placeholder="https://yourwebsite.com">
+                        <input type="text" class="input-field" id="edit-website" placeholder="yourwebsite.com">
                     </div>
                     <div class="edit-form__actions">
                         <button type="button" class="btn-secondary btn-secondary--sm" id="edit-cancel-btn">Cancel</button>
@@ -626,7 +652,10 @@
         <div class="profile-right-col">
             <div class="activity-card">
                 <div class="activity-card__header">
-                    <h2 class="activity-card__title">Posts</h2>
+                    <div style="display:flex;gap:16px;">
+                        <h2 class="activity-card__title activity-tab activity-tab--active" id="tab-posts" data-tab="posts" style="cursor:pointer;">Posts</h2>
+                        <h2 class="activity-card__title activity-tab" id="tab-saved" data-tab="saved" style="cursor:pointer;color:var(--color-text-secondary);display:none;">Saved</h2>
+                    </div>
                     <span class="activity-card__count" id="activity-post-count">0</span>
                 </div>
                 <div id="profile-posts">
@@ -635,6 +664,7 @@
                         <p class="empty-state__text">No posts yet. Share your thoughts!</p>
                     </div>
                 </div>
+                <div id="profile-saved-posts" style="display:none;"></div>
             </div>
         </div>
 
@@ -683,8 +713,18 @@
     <!-- ═══════════════ FOOTER ═══════════════ -->
     <footer class="footer" id="footer">
         <span class="footer__brand">Conectio</span> &copy; 2025 · Connect with purpose.
+        <span style="margin-left:8px;">
+            <a href="about.html" style="color:var(--color-text-secondary);font-size:12px;">About</a> ·
+            <a href="help.html" style="color:var(--color-text-secondary);font-size:12px;">Help</a> ·
+            <a href="privacy.html" style="color:var(--color-text-secondary);font-size:12px;">Privacy</a> ·
+            <a href="terms.html" style="color:var(--color-text-secondary);font-size:12px;">Terms</a>
+        </span>
     </footer>
 
+
+    <!-- Cropper.js CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
     <!-- ═══════════════ SCRIPTS ═══════════════ -->
     <script src="assets/js/api.js"></script>
@@ -738,6 +778,12 @@
                 }
                 renderProfile();
                 loadPosts(profileData.username);
+
+                // Auto-open Saved tab if ?tab=saved
+                if (isOwnProfile && params.get('tab') === 'saved') {
+                    const savedTab = document.getElementById('tab-saved');
+                    if (savedTab) savedTab.click();
+                }
             } catch (err) {
                 loadingEl.style.display = 'none';
                 if (err.status === 404) {
@@ -767,8 +813,9 @@
             // Avatar
             renderAvatar(p);
 
-            // Name & info
-            document.getElementById('profile-name').textContent = p.full_name || p.username;
+            // Name & info (Fix 6: clickable link)
+            const nameEl = document.getElementById('profile-name');
+            nameEl.innerHTML = `<a href="profile.html?username=${p.username}" style="color:inherit;text-decoration:none;">${window.app.escapeHtml(p.full_name || p.username)}</a>`;
             document.getElementById('profile-headline').textContent = p.headline || '';
             document.getElementById('profile-bio').textContent = p.bio || '';
 
@@ -783,8 +830,9 @@
                 const websiteWrap = document.getElementById('profile-website-wrap');
                 const websiteLink = document.getElementById('profile-website');
                 websiteWrap.style.display = 'block';
-                websiteLink.href = p.website;
-                websiteLink.textContent = '🔗 ' + p.website.replace(/^https?:\/\//, '');
+                const websiteUrl = p.website.startsWith('http') ? p.website : 'https://' + p.website;
+                websiteLink.href = websiteUrl;
+                websiteLink.textContent = '🔗 ' + websiteUrl.replace(/^https?:\/\//, '');
             } else {
                 document.getElementById('profile-website-wrap').style.display = 'none';
             }
@@ -802,8 +850,22 @@
             document.getElementById('profile-posts-count').textContent = p.posts_count || 0;
             document.getElementById('activity-post-count').textContent = p.posts_count || 0;
 
+            // Show Saved tab on own profile
+            if (isOwnProfile) {
+                document.getElementById('tab-saved').style.display = '';
+                setupActivityTabs();
+                // Pre-fetch saved post IDs for Save/Unsave toggle
+                window.api.get('/users/me/saved/').then(savedData => {
+                    const savedPosts = savedData.results || savedData || [];
+                    profileSavedIds = new Set(savedPosts.map(p => p.id));
+                }).catch(() => {});
+            }
+
             // Action buttons
             renderActions();
+
+            // Banner (Fix 3)
+            renderBanner(p);
 
             // Show content
             loadingEl.style.display = 'none';
@@ -852,13 +914,19 @@
                 `;
                 document.getElementById('btn-edit-profile').addEventListener('click', toggleEditForm);
 
-                // Avatar click → file upload
+                // Avatar click → file upload with crop (Fix 3)
                 const wrap = document.getElementById('profile-avatar-wrap');
                 wrap.addEventListener('click', () => {
                     const input = document.createElement('input');
                     input.type = 'file';
                     input.accept = 'image/*';
-                    input.onchange = handleAvatarSelect;
+                    input.onchange = (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        if (!file.type.startsWith('image/')) { window.app.showToast('Please select an image file.', 'error'); return; }
+                        if (file.size > 5 * 1024 * 1024) { window.app.showToast('Image must be under 5MB.', 'error'); return; }
+                        openProfileCropModal(file, 'avatar');
+                    };
                     input.click();
                 });
             } else {
@@ -981,6 +1049,151 @@
         }
 
 
+        /* ── Banner Rendering & Upload (Fix 3) ── */
+        function renderBanner(p) {
+            const bannerEl = document.getElementById('profile-banner');
+            if (p.banner) {
+                bannerEl.style.backgroundImage = `url('${p.banner}')`;
+                bannerEl.style.background = `url('${p.banner}') center/cover no-repeat`;
+            }
+
+            if (isOwnProfile) {
+                bannerEl.classList.add('profile-banner--editable');
+                // Add edit overlay if not already present
+                if (!bannerEl.querySelector('.banner-edit-overlay')) {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'banner-edit-overlay';
+                    overlay.innerHTML = '📷 Edit banner';
+                    bannerEl.appendChild(overlay);
+
+                    bannerEl.addEventListener('click', () => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.onchange = (e) => {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            if (!file.type.startsWith('image/')) { window.app.showToast('Please select an image file.', 'error'); return; }
+                            if (file.size > 5 * 1024 * 1024) { window.app.showToast('Image must be under 5MB.', 'error'); return; }
+                            openProfileCropModal(file, 'banner');
+                        };
+                        input.click();
+                    });
+                }
+            }
+        }
+
+        async function uploadBanner(file) {
+            try {
+                const formData = new FormData();
+                formData.append('banner', file);
+                const result = await window.api.patch('/users/me/banner/', formData);
+                profileData.banner = result.banner;
+                renderBanner(profileData);
+                window.app.showToast('Banner updated!', 'success');
+            } catch (err) {
+                window.app.showToast('Failed to upload banner: ' + err.message, 'error');
+            }
+        }
+
+        /* ── Profile Crop Modal (Cropper.js) ──── */
+        let profileCropper = null;
+        let cropTarget = null; // 'avatar' or 'banner'
+
+        function openProfileCropModal(file, target) {
+            cropTarget = target;
+
+            // Create modal if not exists
+            let modal = document.getElementById('profile-crop-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'profile-crop-modal';
+                modal.className = 'ff-modal-overlay';
+                modal.innerHTML = `
+                    <div class="ff-modal-card" style="max-width:560px;">
+                        <div class="ff-modal-header">
+                            <h3 id="profile-crop-title">Crop Image</h3>
+                            <button class="ff-modal-close" id="profile-crop-close">&times;</button>
+                        </div>
+                        <div style="padding:0;background:#000;max-height:400px;overflow:hidden;">
+                            <img id="profile-crop-image" style="max-width:100%;display:block;">
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 16px;border-top:1px solid var(--color-border);flex-wrap:wrap;">
+                            <div style="display:flex;gap:4px;">
+                                <button class="btn-secondary btn-secondary--sm" id="profile-crop-zoom-in" title="Zoom in">🔍+</button>
+                                <button class="btn-secondary btn-secondary--sm" id="profile-crop-zoom-out" title="Zoom out">🔍−</button>
+                                <button class="btn-secondary btn-secondary--sm" id="profile-crop-rotate-left" title="Rotate left">↺</button>
+                                <button class="btn-secondary btn-secondary--sm" id="profile-crop-rotate-right" title="Rotate right">↻</button>
+                            </div>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn-secondary" id="profile-crop-cancel">Cancel</button>
+                                <button class="btn-primary" id="profile-crop-apply">Apply</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+
+                document.getElementById('profile-crop-close').addEventListener('click', closeProfileCropModal);
+                document.getElementById('profile-crop-cancel').addEventListener('click', closeProfileCropModal);
+                document.getElementById('profile-crop-apply').addEventListener('click', applyProfileCrop);
+                document.getElementById('profile-crop-zoom-in').addEventListener('click', () => { if (profileCropper) profileCropper.zoom(0.1); });
+                document.getElementById('profile-crop-zoom-out').addEventListener('click', () => { if (profileCropper) profileCropper.zoom(-0.1); });
+                document.getElementById('profile-crop-rotate-left').addEventListener('click', () => { if (profileCropper) profileCropper.rotate(-45); });
+                document.getElementById('profile-crop-rotate-right').addEventListener('click', () => { if (profileCropper) profileCropper.rotate(45); });
+                modal.addEventListener('click', (e) => { if (e.target === modal) closeProfileCropModal(); });
+            }
+
+            const cropImage = document.getElementById('profile-crop-image');
+            document.getElementById('profile-crop-title').textContent = target === 'avatar' ? 'Crop Avatar' : 'Crop Banner';
+
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                cropImage.src = ev.target.result;
+                modal.hidden = false;
+
+                if (profileCropper) { profileCropper.destroy(); profileCropper = null; }
+
+                profileCropper = new Cropper(cropImage, {
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 1,
+                    aspectRatio: target === 'avatar' ? 1 : 3,
+                    responsive: true,
+                    background: false,
+                    checkOrientation: false,
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function closeProfileCropModal() {
+            const modal = document.getElementById('profile-crop-modal');
+            if (modal) modal.hidden = true;
+            if (profileCropper) { profileCropper.destroy(); profileCropper = null; }
+        }
+
+        function applyProfileCrop() {
+            if (!profileCropper) return;
+            const maxW = cropTarget === 'avatar' ? 400 : 1200;
+            const maxH = cropTarget === 'avatar' ? 400 : 400;
+
+            const canvas = profileCropper.getCroppedCanvas({ maxWidth: maxW, maxHeight: maxH });
+            canvas.toBlob((blob) => {
+                const file = new File([blob], 'cropped.jpg', { type: 'image/jpeg' });
+                if (cropTarget === 'avatar') {
+                    // Preview immediately
+                    const avatarImg = document.getElementById('profile-avatar');
+                    if (avatarImg) { avatarImg.src = canvas.toDataURL('image/jpeg'); avatarImg.classList.remove('avatar-initials'); }
+                    uploadAvatar(file);
+                } else {
+                    uploadBanner(file);
+                }
+                closeProfileCropModal();
+            }, 'image/jpeg', 0.9);
+        }
+
+
         /* ── Save Profile ──────────────────────── */
         editFormTag.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1099,6 +1312,7 @@
                     btn.textContent = '✓ Following';
                     btn.className = 'btn-secondary';
                     btn.dataset.following = 'true';
+                    window.app.addNotification(`You followed ${profileData.full_name || profileData.username}`, '👥');
                 } else {
                     btn.textContent = 'Follow';
                     btn.className = 'btn-primary';
@@ -1139,7 +1353,7 @@
             const avatarSrc = author.avatar || window.app.getInitialsAvatar(author.username || 'U', 48);
             const displayName = `${author.first_name || ''} ${author.last_name || ''}`.trim() || author.username || 'User';
             const headline = author.headline || '';
-            const timeAgoStr = post.time_ago || window.app.timeAgo(post.created_at);
+            const timeAgoStr = post.time_ago || window.app.formatTimeAgo(post.created_at);
             const content = post.content || '';
             const isLiked = post.is_liked || false;
             const currentUser = window.auth.getCurrentUser();
@@ -1159,7 +1373,7 @@
             let imageHtml = '';
             if (post.image) {
                 const imgUrl = post.image.startsWith('http') ? post.image : `${window.api.BASE.replace('/api', '')}${post.image}`;
-                imageHtml = `<img style="width:100%;max-height:400px;object-fit:cover;display:block;" src="${imgUrl}" alt="Post image" loading="lazy">`;
+                imageHtml = `<img style="width:100%;max-height:400px;object-fit:cover;display:block;cursor:pointer;transition:opacity 150ms ease;" src="${imgUrl}" alt="Post image" loading="lazy" onclick="window.app.openLightbox('${imgUrl}')" onmouseover="this.style.opacity='0.95'" onmouseout="this.style.opacity='1'">`;
             }
 
             const likesCount = post.likes_count || 0;
@@ -1174,15 +1388,15 @@
                         ${headline ? `<div style="font-size:12px;color:var(--color-text-secondary);">${window.app.escapeHtml(headline)}</div>` : ''}
                         <div style="font-size:12px;color:var(--color-text-secondary);">${timeAgoStr}</div>
                     </div>
-                    ${isOwn ? `<div style="margin-left:auto;flex-shrink:0;position:relative;"><button style="border:none;background:none;cursor:pointer;font-size:18px;color:var(--color-text-secondary);padding:4px;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 150ms ease;" data-action="menu" data-post-id="${post.id}" onmouseover="this.style.background='var(--color-bg-hover)'" onmouseout="this.style.background='none'">⋯</button><div id="profile-dropdown-${post.id}"></div></div>` : ''}
+                    <div style="margin-left:auto;flex-shrink:0;position:relative;"><button style="border:none;background:none;cursor:pointer;font-size:18px;color:var(--color-text-secondary);padding:4px;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 150ms ease;" data-action="menu" data-post-id="${post.id}" onmouseover="this.style.background='var(--color-bg-hover)'" onmouseout="this.style.background='none'">⋯</button><div id="profile-dropdown-${post.id}"></div></div>
                 </div>
                 <div style="padding:0 16px 12px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;" id="profile-post-content-${post.id}">
-                    ${isTruncated ? `<span class="truncated-text">${displayContent}...</span><button style="color:var(--color-text-secondary);font-weight:600;border:none;background:none;cursor:pointer;font-size:14px;" data-action="see-more" data-post-id="${post.id}">see more</button><span class="full-text" style="display:none;">${fullContent}</span>` : fullContent}
+                    ${isTruncated ? `<span class="truncated-text">${displayContent}...</span><button style="color:var(--color-text-secondary);font-weight:600;border:none;background:none;cursor:pointer;font-size:14px;" data-action="see-more" data-post-id="${post.id}">...See more</button><span class="full-text" style="display:none;">${fullContent}</span>` : fullContent}
                 </div>
                 ${imageHtml}
                 <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-top:1px solid var(--color-border);font-size:12px;color:var(--color-text-secondary);">
                     <span>${likesCount > 0 ? `👍 <span id="profile-likes-${post.id}">${likesCount}</span>` : `<span id="profile-likes-${post.id}">0</span>`}</span>
-                    <span><span id="profile-comments-count-${post.id}">${commentsCount}</span> comment${commentsCount !== 1 ? 's' : ''}</span>
+                    <span style="cursor:pointer;" data-action="comment" data-post-id="${post.id}"><span id="profile-comments-count-${post.id}">${commentsCount}</span> comment${commentsCount !== 1 ? 's' : ''}</span>
                 </div>
                 <div style="display:flex;border-top:1px solid var(--color-border);">
                     <button style="flex:1;padding:10px 0;font-size:14px;font-weight:600;color:${isLiked ? 'var(--color-primary)' : 'var(--color-text-secondary)'};border:none;background:none;cursor:pointer;transition:background 150ms ease;" id="profile-like-btn-${post.id}" data-action="like" data-post-id="${post.id}" data-liked="${isLiked}" onmouseover="this.style.background='var(--color-bg-hover)'" onmouseout="this.style.background='none'">
@@ -1213,7 +1427,7 @@
                     case 'comment': toggleProfileComments(id); break;
                     case 'see-more': handleProfileSeeMore(id); break;
                     case 'menu': handleProfilePostMenu(id); break;
-                    case 'save-post': closeProfileDropdowns(); window.app.showToast('Post saved! (Coming soon)', 'info'); break;
+                    case 'save-post': closeProfileDropdowns(); handleProfileSavePost(id); break;
                     case 'copy-link': closeProfileDropdowns(); handleProfileCopyLink(id); break;
                     case 'delete-post': showProfileDeleteConfirm(id); break;
                     case 'cancel-delete': closeProfileDropdowns(); break;
@@ -1263,6 +1477,10 @@
                 btn.style.color = result.liked ? 'var(--color-primary)' : 'var(--color-text-secondary)';
                 if (labelEl) labelEl.textContent = result.liked ? 'Liked' : 'Like';
                 if (countEl) countEl.textContent = result.likes_count;
+
+                if (result.liked) {
+                    window.app.addNotification('You liked a post', '👍');
+                }
             } catch (err) {
                 // Revert
                 btn.dataset.liked = String(wasLiked);
@@ -1298,21 +1516,38 @@
 
             closeProfileDropdowns();
 
+            const isSaved = profileSavedIds.has(postId);
+
+            // Check if this is the user's own post
+            const currentUser = window.auth.getCurrentUser();
+            const card = document.getElementById(`profile-post-${postId}`);
+            const authorName = card ? card.querySelector('[data-action="menu"]') : null;
+            const postCard = card;
+            let isOwnPost = false;
+            if (currentUser && postCard) {
+                const authorEl = postCard.querySelector('div[style*="font-weight:600"]');
+                const authorText = authorEl ? authorEl.textContent.trim() : '';
+                const ownName = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || currentUser.username;
+                isOwnPost = authorText === ownName;
+            }
+
             container.innerHTML = `
                 <div style="position:absolute;top:100%;right:0;margin-top:4px;min-width:200px;background:var(--color-bg-card);border-radius:var(--radius-md);box-shadow:0 4px 12px rgba(0,0,0,0.15);padding:6px 0;z-index:100;animation:fadeIn 150ms ease;">
                     <button style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;font-size:14px;color:var(--color-text-primary);border:none;background:none;cursor:pointer;text-align:left;transition:background 150ms ease;" data-action="save-post" data-post-id="${postId}" onmouseover="this.style.background='var(--color-bg-hover)'" onmouseout="this.style.background='none'">
-                        <span style="font-size:18px;width:22px;text-align:center;">🔖</span>
-                        Save post
+                        <span style="font-size:18px;width:22px;text-align:center;">${isSaved ? '❌' : '🔖'}</span>
+                        ${isSaved ? 'Unsave post' : 'Save post'}
                     </button>
                     <button style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;font-size:14px;color:var(--color-text-primary);border:none;background:none;cursor:pointer;text-align:left;transition:background 150ms ease;" data-action="copy-link" data-post-id="${postId}" onmouseover="this.style.background='var(--color-bg-hover)'" onmouseout="this.style.background='none'">
                         <span style="font-size:18px;width:22px;text-align:center;">🔗</span>
                         Copy link
                     </button>
+                    ${isOwnPost ? `
                     <div style="height:1px;background:var(--color-border);margin:4px 0;"></div>
                     <button style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;font-size:14px;color:var(--color-error);border:none;background:none;cursor:pointer;text-align:left;transition:background 150ms ease;" data-action="delete-post" data-post-id="${postId}" onmouseover="this.style.background='rgba(204,16,22,0.06)'" onmouseout="this.style.background='none'">
                         <span style="font-size:18px;width:22px;text-align:center;">🗑️</span>
                         Delete post
                     </button>
+                    ` : ''}
                 </div>
             `;
 
@@ -1363,6 +1598,100 @@
                     .catch(() => window.app.showToast('Link: ' + url, 'info'));
             } else {
                 window.app.showToast('Link: ' + url, 'info');
+            }
+        }
+
+        async function handleProfileSavePost(postId) {
+            closeProfileDropdowns();
+            try {
+                const result = await window.api.post(`/posts/${postId}/save/`);
+                if (result.saved) {
+                    profileSavedIds.add(postId);
+                    window.app.showToast('Post saved!', 'success');
+                } else {
+                    profileSavedIds.delete(postId);
+                    window.app.showToast('Post removed from saved.', 'info');
+                    // If on Saved tab, remove the card
+                    const savedTab = document.querySelector('#tab-saved.activity-tab--active');
+                    if (savedTab) {
+                        const card = document.getElementById(`profile-post-card-${postId}`);
+                        if (card) card.remove();
+                        // Update count
+                        document.getElementById('activity-post-count').textContent = profileSavedIds.size;
+                        // Show empty state if no more saved posts
+                        const container = document.getElementById('profile-saved-posts');
+                        if (container && !container.querySelector('.post-card')) {
+                            container.innerHTML = `
+                                <div class="empty-state">
+                                    <div class="empty-state__icon">🔖</div>
+                                    <p class="empty-state__text">No saved posts yet. Save posts from your feed to find them here.</p>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+            } catch (err) {
+                window.app.showToast('Failed to save post.', 'error');
+            }
+        }
+
+        /* ── Activity Tabs (Posts / Saved) ──────── */
+        let savedPostsLoaded = false;
+        let profileSavedIds = new Set();
+
+        function setupActivityTabs() {
+            const tabs = document.querySelectorAll('.activity-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.dataset.tab;
+                    tabs.forEach(t => {
+                        t.classList.remove('activity-tab--active');
+                        t.style.color = 'var(--color-text-secondary)';
+                    });
+                    tab.classList.add('activity-tab--active');
+                    tab.style.color = '';
+
+                    if (target === 'posts') {
+                        document.getElementById('profile-posts').style.display = '';
+                        document.getElementById('profile-saved-posts').style.display = 'none';
+                        document.getElementById('activity-post-count').textContent = profileData.posts_count || 0;
+                    } else if (target === 'saved') {
+                        document.getElementById('profile-posts').style.display = 'none';
+                        document.getElementById('profile-saved-posts').style.display = '';
+                        if (!savedPostsLoaded) {
+                            loadSavedPosts();
+                        }
+                    }
+                });
+            });
+        }
+
+        async function loadSavedPosts() {
+            const container = document.getElementById('profile-saved-posts');
+            container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--color-text-secondary);font-size:13px;"><div class="spinner spinner--sm" style="margin:0 auto;"></div></div>';
+
+            try {
+                const data = await window.api.get('/users/me/saved/');
+                const posts = data.results || data || [];
+                savedPostsLoaded = true;
+                profileSavedIds = new Set(posts.map(p => p.id));
+
+                document.getElementById('activity-post-count').textContent = posts.length;
+
+                if (posts.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state__icon">🔖</div>
+                            <p class="empty-state__text">No saved posts yet. Save posts from your feed to find them here.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = posts.map(post => renderProfilePostCard(post)).join('');
+                posts.forEach(post => attachProfilePostEvents(post.id));
+            } catch (err) {
+                container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--color-text-secondary);">Failed to load saved posts.</div>';
             }
         }
 

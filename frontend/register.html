@@ -165,6 +165,12 @@
                         </button>
                     </div>
                     <div class="form-error" id="register-password-error" style="display: none;"></div>
+                    <div class="password-strength" id="password-strength" style="display: none;">
+                        <div class="password-strength__bar-wrap">
+                            <div class="password-strength__bar" id="password-strength-bar"></div>
+                        </div>
+                        <span class="password-strength__label" id="password-strength-label"></span>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -206,6 +212,12 @@
     <!-- ═══════════════ FOOTER ═══════════════ -->
     <footer class="footer" id="footer">
         <span class="footer__brand">Conectio</span> &copy; 2025 · Connect with purpose.
+        <span style="margin-left:8px;">
+            <a href="about.html" style="color:var(--color-text-secondary);font-size:12px;">About</a> ·
+            <a href="help.html" style="color:var(--color-text-secondary);font-size:12px;">Help</a> ·
+            <a href="privacy.html" style="color:var(--color-text-secondary);font-size:12px;">Privacy</a> ·
+            <a href="terms.html" style="color:var(--color-text-secondary);font-size:12px;">Terms</a>
+        </span>
     </footer>
 
 
@@ -366,6 +378,96 @@
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = 'Agree & Join';
+            }
+        });
+        // ── Real-time validation on input ──
+        document.getElementById('register-firstname').addEventListener('input', function() {
+            const val = this.value.trim();
+            if (!val) {
+                this.classList.remove('input-field--success', 'input-field--error');
+            } else {
+                this.classList.add('input-field--success');
+                this.classList.remove('input-field--error');
+                const errEl = document.getElementById('register-firstname-error');
+                if (errEl) errEl.style.display = 'none';
+            }
+        });
+
+        document.getElementById('register-lastname').addEventListener('input', function() {
+            const val = this.value.trim();
+            if (!val) {
+                this.classList.remove('input-field--success', 'input-field--error');
+            } else {
+                this.classList.add('input-field--success');
+                this.classList.remove('input-field--error');
+                const errEl = document.getElementById('register-lastname-error');
+                if (errEl) errEl.style.display = 'none';
+            }
+        });
+
+        document.getElementById('register-username').addEventListener('input', function() {
+            const error = window.app.validateUsername(this.value.trim());
+            window.app.setFieldValidation('register-username', error);
+        });
+
+        document.getElementById('register-email').addEventListener('input', function() {
+            const val = this.value.trim();
+            if (!val) {
+                this.classList.remove('input-field--success', 'input-field--error');
+                const errEl = document.getElementById('register-email-error');
+                if (errEl) errEl.style.display = 'none';
+            } else {
+                const error = window.app.validateEmail(val);
+                window.app.setFieldValidation('register-email', error);
+            }
+        });
+
+        document.getElementById('register-password').addEventListener('input', function() {
+            const val = this.value;
+            const strengthEl = document.getElementById('password-strength');
+            const barEl = document.getElementById('password-strength-bar');
+            const labelEl = document.getElementById('password-strength-label');
+
+            if (!val) {
+                strengthEl.style.display = 'none';
+                this.classList.remove('input-field--success', 'input-field--error');
+                const errEl = document.getElementById('register-password-error');
+                if (errEl) errEl.style.display = 'none';
+                return;
+            }
+
+            strengthEl.style.display = 'block';
+            const strength = window.app.getPasswordStrength(val);
+
+            barEl.className = 'password-strength__bar password-strength__bar--' + strength;
+            labelEl.className = 'password-strength__label password-strength__label--' + strength;
+            labelEl.textContent = strength.charAt(0).toUpperCase() + strength.slice(1) + ' password';
+
+            const error = window.app.validatePassword(val);
+            window.app.setFieldValidation('register-password', error);
+
+            // Also check password2 match if it has value
+            const pw2 = document.getElementById('register-password2');
+            if (pw2.value) {
+                if (pw2.value !== val) {
+                    window.app.setFieldValidation('register-password2', 'Passwords do not match.');
+                } else {
+                    window.app.setFieldValidation('register-password2', null);
+                }
+            }
+        });
+
+        document.getElementById('register-password2').addEventListener('input', function() {
+            const val = this.value;
+            const pw = document.getElementById('register-password').value;
+            if (!val) {
+                this.classList.remove('input-field--success', 'input-field--error');
+                const errEl = document.getElementById('register-password2-error');
+                if (errEl) errEl.style.display = 'none';
+            } else if (val !== pw) {
+                window.app.setFieldValidation('register-password2', 'Passwords do not match.');
+            } else {
+                window.app.setFieldValidation('register-password2', null);
             }
         });
     </script>
